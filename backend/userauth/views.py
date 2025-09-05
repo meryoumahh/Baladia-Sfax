@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView
-from .serializers import CustomUserSerializer, ServiceProviderSignupSerializer, LoginSerializer, ClientSignupSerializer
+from .serializers import CustomUserSerializer, AgentSignupSerializer, LoginSerializer, CitoyenSignupSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -9,7 +9,7 @@ from rest_framework import status
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework_simplejwt.exceptions import InvalidToken
 from rest_framework import permissions
-from .models import CustomUser, ClientProfile, ServiceProviderProfile
+from .models import CustomUser, CitoyenProfile, AgentProfile
 # Create your views here.
 class UserInfoView(RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
@@ -45,34 +45,34 @@ class UserSignupView(CreateAPIView):
 
 
 
-class ClientSignupView(APIView):
+class CitoyenSignupView(APIView):
     def post(self, request):
-        serializer = ClientSignupSerializer(data=request.data)
+        serializer = CitoyenSignupSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response({"message": "User created successfully"}, status=status.HTTP_201_CREATED)
+            return Response({"message": "citoyen created successfully"}, status=status.HTTP_201_CREATED)
         else:
             print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
-    queryset = ClientProfile.objects.all()
-    serializer_class = CustomUserSerializer
+    queryset = CitoyenProfile.objects.all()
+    serializer_class = CitoyenSignupSerializer
     permission_classes = [permissions.AllowAny]
     permission_classes = [AllowAny]
 
 
-class ServiceProviderSignupView(APIView):
+class AgentSignupView(APIView):
     def post(self, request):
-        serializer = ServiceProviderSignupSerializer(data=request.data)
+        serializer = AgentSignupSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response({"message": "User created successfully"}, status=status.HTTP_201_CREATED)
+            return Response({"message": "Agent created successfully"}, status=status.HTTP_201_CREATED)
         else:
             print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
-    queryset = ServiceProviderProfile.objects.all()
-    serializer_class = ServiceProviderSignupSerializer
+    queryset = AgentProfile.objects.all()
+    serializer_class = AgentSignupSerializer
     permission_classes = [permissions.AllowAny]
     permission_classes = [AllowAny]
 

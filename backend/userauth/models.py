@@ -28,8 +28,8 @@ class CustomUserManager(BaseUserManager):
 # Custom user model
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     ROLE_CHOICES = [
-        ("client", "Client"),
-        ("service_provider", "Service provider"),
+        ("citoyen", "Citoyen"),
+        ("agent", "Agent"),
         ("admin", "Admin"),
     ]
 
@@ -38,10 +38,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(max_length=150)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=128)  # optional, AbstractBaseUser already has password
-    telephone = models.CharField(max_length=20, blank=True, null=True)
-    profilePicture = models.ImageField(upload_to="profile_pics/", blank=True, null=True, default="default_profile_pic.jpg")
+    
+
     dateOfCreation = models.DateTimeField(auto_now_add=True)
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="client")
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="citoyen")
 
     # Django auth fields
     is_active = models.BooleanField(default=True)
@@ -61,7 +61,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     # Optional: automatically set is_staff based on role
     def save(self, *args, **kwargs):
-        if self.role == "service_provider":
+        if self.role == "agent":
             self.is_staff = False
         elif self.role == "admin":
             self.is_staff = True
@@ -71,67 +71,29 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 
 
-class ClientProfile(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name="customer_profile")
+class CitoyenProfile(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name="citoyen_profile")
 
-    class PaiementMethod(models.TextChoices):
-        CASH = 'CASH', 'CASH'
-        VIREMENT = 'VIREMENT', 'VIREMENT'
-        CREDIT_CARD = 'CREDIT_CARD', 'CREDIT_CARD'
-        PAYPAL = 'PAYPAL', 'PAYPAL'
+    
         
-        
-    class Preferences(models.TextChoices):
-        AUTRE = 'AUTRE', 'Autre'
-        AVENTURE = 'AVENTURE', 'Voyage d\'aventure'
-        PLAGE = 'PLAGE', 'Plage & Détente'
-        CULTURE = 'CULTURE', 'Circuits Culturels & Historiques'
-        NATURE = 'NATURE', 'Nature & Randonnée'
-        ROAD_TRIP = 'ROAD_TRIP', 'Voyage en Route'
-        LUXE = 'LUXE', 'Voyage de Luxe'
-        CROISIERE = 'CROISIERE', 'Croisières'
-        BIEN_ETRE = 'BIEN_ETRE', 'Bien-être & Spa'
-        GASTRONOMIE = 'GASTRONOMIE', 'Gastronomie & Expériences Culinaires'
-        FESTIVALS = 'FESTIVALS', 'Festivals & Événements'
-        SPORT = 'SPORT', 'Sports & Activités en Plein Air'
-        FAMILLE = 'FAMILLE', 'Voyage en Famille'
-
-        
-
+    telephone = models.CharField(max_length=20, blank=True, null=True)
     address = models.CharField(max_length=255, default="No address provided")
     dateOfBirth = models.DateField( default=timezone.now)
+    cin = models.ImageField(upload_to="cins/", blank=True, null=True, default="default_cin.jpg")
     
-    preferences = models.CharField(
-        max_length=30,
-        choices=Preferences.choices,
-        default=Preferences.AUTRE,
-    )
-
-    paiementMethod = models.CharField(
-        max_length=100,
-        choices=PaiementMethod.choices,
-        default=PaiementMethod.CASH,
-    )
     
-class ServiceProviderProfile(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name="provider_profile")
+    
+class AgentProfile(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name="agent_profile")
     class ServiceCategory(models.TextChoices):
-        TOUR_GUIDE = 'TOUR_GUIDE', 'Guide Touristique'
-        TRANSPORT = 'TRANSPORT', 'Transportation'
-        ACCOMMODATION = 'ACCOMMODATION', 'Accommodation'
-        RESTAURANTCAFFE = 'RESTAURANTCAFFE', 'Restaurant & Cafe'
+        LIGHT = 'LIGHT', 'LIGHT'
+        ROAD = 'ROAD', 'ROAD'
+        ALL='ALL', 'ALL'
         # Add other categories as needed
-        
-        
-    AgenceId = models.CharField(max_length=100)
-    businessName = models.CharField(max_length=255)
-    location = models.CharField(max_length=255)
-    rate = models.IntegerField(default=0)
-    contactInfo = models.CharField(max_length=255, default="No contact info provided")  
-    Packages = models.CharField(max_length=255, default="No packages available")
+    
     serviceCategory = models.CharField(
         max_length=30,
         choices=ServiceCategory.choices,
-        default=ServiceCategory.ACCOMMODATION,
+        default=ServiceCategory.ALL,
     )
 

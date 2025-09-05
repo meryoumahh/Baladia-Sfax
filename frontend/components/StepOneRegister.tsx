@@ -17,8 +17,7 @@ interface Step1Props {
     password: string;
     setPassword: (password: string) => void;
 
-    telephone: string;
-    setTelephone: (telephone: string) => void;
+    
 
     
 
@@ -28,7 +27,7 @@ interface Step1Props {
 
 
 
-const StepOneRegister = ({ role, setRole, email, setEmail, firstName, setFirstName, lastName, setLastName, password , setPassword, telephone, setTelephone , onNext } : Step1Props) => {
+const StepOneRegister = ({ role, setRole, email, setEmail, firstName, setFirstName, lastName, setLastName, password , setPassword, onNext } : Step1Props) => {
   
     const [error, setError] = useState<Record<string, string>>({});
     // Validation function
@@ -56,9 +55,7 @@ const StepOneRegister = ({ role, setRole, email, setEmail, firstName, setFirstNa
       newErrors.password = "Password must be at least 8 characters";
 
     // Telephone: exactly 8 digits (Tunisia style)
-    if (!telephone) newErrors.telephone = "Telephone is required";
-    else if (!/^[0-9]{8}$/.test(telephone))
-      newErrors.telephone = "Telephone must be 8 digits";
+    
 
     setError(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -138,7 +135,7 @@ const StepOneRegister = ({ role, setRole, email, setEmail, firstName, setFirstNa
           )}
         </div>
 
-        {/* Telephone */}
+        {/* Telephone 
         <div>
           <label className="block mb-1 font-medium">Telephone</label>
           <input
@@ -152,7 +149,7 @@ const StepOneRegister = ({ role, setRole, email, setEmail, firstName, setFirstNa
           {error.telephone && (
             <p className="text-red-500 text-sm mt-1">{error.telephone}</p>
           )}
-        </div>
+        </div>*/}
 
         {/* Profile Picture 
         <div>
@@ -178,8 +175,8 @@ const StepOneRegister = ({ role, setRole, email, setEmail, firstName, setFirstNa
             }}
             className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
           >
-            <option value="client">Client</option>
-            <option value="service_provider">Service Provider</option>
+            <option value="citoyen">Citoyen</option>
+            <option value="agent">Agent</option>
           </select>
         </div>
 

@@ -12,8 +12,7 @@ export const registerUser = async (
     role: string,
     address : string,
     dateOfBirth : string,
-    paymentMethod : string,
-    preferences : string[]
+    
 
 ) => {
     try { 
@@ -24,14 +23,12 @@ export const registerUser = async (
                 email: email,
                 password: password,
                 telephone: telephone,
-                role: "client", // should be "client"
+                role: "citoyen", // should be "client"
             },
             address: address,
             dateOfBirth: dateOfBirth, // format as ISO string: yyyy-MM-dd
-            paiementMethod: paymentMethod, // mind the spelling "paiementMethod" as per backend model
-            preferences: preferences.length > 0 ? preferences[0] : "AUTRE", // single choice string expected
             };       
-        const response = await axios.post(`${API_URL}client/signup/`, data,
+        const response = await axios.post(`${API_URL}citoyen/signup/`, data,
              );
 
 
@@ -61,9 +58,6 @@ export const registerServiceProvider = async (
     password: string,
     telephone: string,
     role: string,
-    agenceId: string,
-    businessName: string,
-    location: string,
     serviceCategory: string,
 ) => {  
     try {
@@ -74,14 +68,13 @@ export const registerServiceProvider = async (
                 email: email,
                 password: password,
                 telephone: telephone,
-                role: "service_provider", // should be "service_provider"
+                role: "agent", // should be "service_provider"
             },
-            AgenceId: agenceId, 
-            businessName: businessName,
+            
             location: location,
             serviceCategory: serviceCategory,
         };
-        const response = await axios.post(`${API_URL}service-provider/signup/`, data,
+        const response = await axios.post(`${API_URL}agent/signup/`, data,
                 );
         alert(
       "INFO SENT: \n" +
@@ -97,7 +90,7 @@ export const registerServiceProvider = async (
     else {
         console.error(e);
     }
-    throw new Error("Service Provider Registration failed");
+    throw new Error("Agent Registration failed");
     }
 }
 

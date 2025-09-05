@@ -14,21 +14,18 @@ const Page = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [password, setPassword] = useState("");
-  const [telephone, setTelephone] = useState("");
-  const [profilePicture, setProfilePicture] = useState<File | null>(null);
+  
 
   // client infos
   const [address, setAddress] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("");
-  const [preferences, setPreferences] = useState<string[]>([]);
+  const [telephone, setTelephone] = useState("");
+  const [cin, setcin] = useState<File | null>(null);
 
   // service provider infos
-  const [agenceId, setAgenceId] = useState("");
-  const [businessName, setBusinessName] = useState("");
-  const [location, setLocation] = useState("");
+  
   const [serviceCategory, setServiceCategory] = useState("");
-  const [error, setError] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -58,7 +55,7 @@ const Page = () => {
     else if (!/^[0-9]{8}$/.test(telephone))
       newErrors.telephone = "Telephone must be 8 digits";
 
-    setError(newErrors);
+    setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
   const handleClientSubmit = async () => {
@@ -67,12 +64,10 @@ const Page = () => {
       lastName,
       email,
       password,
-      telephone,
       role,
       address,
       dateOfBirth,
-      paymentMethod,
-      preferences,
+      telephone,
     };
 
     try {
@@ -85,8 +80,7 @@ const Page = () => {
         userData.role,
         userData.address,
         userData.dateOfBirth,
-        userData.paymentMethod,
-        userData.preferences
+        
       );
       alert("Client registration works successfully!");
     } catch (e) {
@@ -99,10 +93,8 @@ const Page = () => {
           userData.telephone + ", " +
           userData.role + ", " +
           userData.address + ", " +
-          userData.dateOfBirth + ", " +
-          userData.paymentMethod + ", " +
-          userData.preferences.join(", ")
-      );
+          userData.dateOfBirth + ", " 
+        );
       console.error(e);
     }
   };
@@ -115,9 +107,6 @@ const Page = () => {
       password,
       telephone,
       role,
-      agenceId,
-      businessName,
-      location,
       serviceCategory,
     };
 
@@ -129,9 +118,6 @@ const Page = () => {
         userData.password,
         userData.telephone,
         userData.role,
-        userData.agenceId,
-        userData.businessName,
-        userData.location,
         userData.serviceCategory
       );
       alert("Service Provider registration works successfully!");
@@ -144,9 +130,6 @@ const Page = () => {
           userData.password + ", " +
           userData.telephone + ", " +
           userData.role + ", " +
-          userData.agenceId + ", " +
-          userData.businessName + ", " +
-          userData.location + ", " +
           userData.serviceCategory
       );
       console.error(e);
@@ -168,8 +151,7 @@ const Page = () => {
           setLastName={setLastName}
           password={password}
           setPassword={setPassword}
-          telephone={telephone}
-          setTelephone={setTelephone}
+          
           onNext={() => {
             // simple validation
 
@@ -188,22 +170,17 @@ const Page = () => {
           setAddress={setAddress}
           dateOfBirth={dateOfBirth}
           setDateOfBirth={setDateOfBirth}
-          paymentMethod={paymentMethod}
-          setPaymentMethod={setPaymentMethod}
-          preferences={preferences}
-          setPreferences={setPreferences}
+          telephone={telephone}
+          setTelephone={setTelephone}
+          cin={cin}
+          setCin={setcin}
           onSubmit={handleClientSubmit}
         />
       )}
 
       {stepIndex === 1 && role.toLowerCase() !== "client" && (
         <StepTwoRegisterServiceProvider
-          agenceId={agenceId}
-          setAgenceId={setAgenceId}
-          businessName={businessName}
-          setBusinessName={setBusinessName}
-          location={location}
-          setLocation={setLocation}
+        
           serviceCategory={serviceCategory}
           setServiceCategory={setServiceCategory}
           errors={{}}

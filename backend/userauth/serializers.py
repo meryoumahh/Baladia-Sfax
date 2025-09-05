@@ -1,5 +1,5 @@
 from rest_framework.serializers import ModelSerializer, Serializer
-from .models import CustomUser, ClientProfile, ServiceProviderProfile
+from .models import CustomUser, CitoyenProfile, AgentProfile
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from rest_framework.permissions import AllowAny
@@ -16,7 +16,7 @@ from datetime import date
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['first_name','last_name', 'email', 'password', 'telephone','role']
+        fields = ['first_name','last_name', 'email', 'password', 'role']
         extra_kwargs = {'password': {'write_only': True}}
 
     def validate_first_name(self, first_name):
@@ -50,11 +50,11 @@ class CustomUserSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
-class ClientSignupSerializer(serializers.ModelSerializer):
+class CitoyenSignupSerializer(serializers.ModelSerializer):
     user = CustomUserSerializer()
     class Meta:
-        model = ClientProfile
-        fields = ['user', 'address', 'dateOfBirth', 'paiementMethod', 'preferences']
+        model = CitoyenProfile
+        fields = ['user', 'address', 'dateOfBirth', 'cin']
         
 
     def validate_dateOfBirth(self, value):
@@ -67,25 +67,25 @@ class ClientSignupSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         user_data = validated_data.pop('user')
-        user_data['role'] = 'client'
+        user_data['role'] = 'citoyen'
         user = CustomUserSerializer.create(CustomUserSerializer(), validated_data=user_data)
-        profile = ClientProfile.objects.create(user=user, **validated_data)
+        profile = CitoyenProfile.objects.create(user=user, **validated_data)
         return profile
 
 
-class ServiceProviderSignupSerializer(serializers.ModelSerializer):
+class AgentSignupSerializer(serializers.ModelSerializer):
     user = CustomUserSerializer()
 
     class Meta:
-        model = ServiceProviderProfile
-        fields = ['user', 'AgenceId', 'businessName', 'location',  'serviceCategory']
+        model = AgentProfile
+        fields = ['user',  'serviceCategory']
         
 
     def create(self, validated_data):
         user_data = validated_data.pop('user')
-        user_data['role'] = 'service_provider'
+        user_data['role'] = 'agent '
         user = CustomUserSerializer.create(CustomUserSerializer(), validated_data=user_data)
-        profile = ServiceProviderProfile.objects.create(user=user, **validated_data)
+        profile = AgentProfile.objects.create(user=user, **validated_data)
         return profile
     
 #class ClientSignupSerializer(serializers.ModelSerializer):

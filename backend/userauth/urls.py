@@ -1,9 +1,9 @@
 from django.urls import path 
-from .views import UserInfoView , ServiceProviderSignupView, UserLoginView, UserLogoutView, CookieTokenRefreshView,ClientSignupView, UserSignupView
+from .views import UserInfoView , AgentSignupView, UserLoginView, UserLogoutView, CookieTokenRefreshView,CitoyenSignupView, UserSignupView
 urlpatterns = [
     path ("user-info/", UserInfoView.as_view(), name="user-info"),
-    path ("service-provider/signup/", ServiceProviderSignupView.as_view(), name="signup-service-provider"),
-    path ("client/signup/", ClientSignupView.as_view(), name="signup-client"),
+    path ("agent/signup/", AgentSignupView.as_view(), name="signup-agent"),
+    path ("citoyen/signup/", CitoyenSignupView.as_view(), name="signup-citoyen"),
     path ("login/", UserLoginView.as_view(), name="login-user"),
     path ("logout/", UserLogoutView.as_view(), name="logout-user"),
     path ("common/signup/",UserSignupView.as_view() , name="signup-user"),
