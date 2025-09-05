@@ -8,15 +8,33 @@ export const registerUser = async (
     email: string,
     password: string,
     telephone: string,
-   // profilePicture: File | null,
     role: string,
     address : string,
     dateOfBirth : string,
+    cin: File | null,
+
     
 
 ) => {
     try { 
-        const data = {
+
+        const formData = new FormData();
+        formData.append('user', JSON.stringify({
+            first_name,
+            last_name,
+            email,
+            password,
+            telephone,
+            role: "citoyen", // should be "client"
+            
+        }));
+        
+
+        formData.append('address', address);
+        formData.append('dateOfBirth', dateOfBirth);
+        formData.append('cin', cin ? cin : new Blob()); // Append empty Blob if null
+        
+        /*const data = {
             user: {
                 first_name: first_name,
                 last_name: last_name,
@@ -27,14 +45,18 @@ export const registerUser = async (
             },
             address: address,
             dateOfBirth: dateOfBirth, // format as ISO string: yyyy-MM-dd
-            };       
-        const response = await axios.post(`${API_URL}citoyen/signup/`, data,
-             );
+            };*/       
+        const response = await axios.post(`${API_URL}citoyen/signup/`, formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+            });
+             
 
 
         alert(
       "INFO SENT: \n" +
-        JSON.stringify(data, null, 2)
+        JSON.stringify(formData, null, 2)
     );
 
        

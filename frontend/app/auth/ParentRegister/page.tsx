@@ -68,6 +68,8 @@ const Page = () => {
       address,
       dateOfBirth,
       telephone,
+      cin
+      
     };
 
     try {
@@ -80,6 +82,8 @@ const Page = () => {
         userData.role,
         userData.address,
         userData.dateOfBirth,
+        userData.cin
+        
         
       );
       alert("Client registration works successfully!");
@@ -151,7 +155,8 @@ const Page = () => {
           setLastName={setLastName}
           password={password}
           setPassword={setPassword}
-          
+          telephone={telephone}
+          setTelephone={setTelephone}
           onNext={() => {
             // simple validation
 

@@ -17,7 +17,8 @@ interface Step1Props {
     password: string;
     setPassword: (password: string) => void;
 
-    
+    telephone: string;
+    setTelephone: (telephone: string) => void;
 
     
 
@@ -27,7 +28,7 @@ interface Step1Props {
 
 
 
-const StepOneRegister = ({ role, setRole, email, setEmail, firstName, setFirstName, lastName, setLastName, password , setPassword, onNext } : Step1Props) => {
+const StepOneRegister = ({ role, setRole, email, setEmail, firstName, setFirstName, lastName, setLastName, password , setPassword, telephone, setTelephone, onNext } : Step1Props) => {
   
     const [error, setError] = useState<Record<string, string>>({});
     // Validation function
@@ -135,7 +136,7 @@ const StepOneRegister = ({ role, setRole, email, setEmail, firstName, setFirstNa
           )}
         </div>
 
-        {/* Telephone 
+        {/* Telephone */}
         <div>
           <label className="block mb-1 font-medium">Telephone</label>
           <input
@@ -149,7 +150,7 @@ const StepOneRegister = ({ role, setRole, email, setEmail, firstName, setFirstNa
           {error.telephone && (
             <p className="text-red-500 text-sm mt-1">{error.telephone}</p>
           )}
-        </div>*/}
+        </div>
 
         {/* Profile Picture 
         <div>

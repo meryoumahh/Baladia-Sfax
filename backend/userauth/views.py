@@ -10,6 +10,8 @@ from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework_simplejwt.exceptions import InvalidToken
 from rest_framework import permissions
 from .models import CustomUser, CitoyenProfile, AgentProfile
+import json
+
 # Create your views here.
 class UserInfoView(RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
@@ -47,7 +49,19 @@ class UserSignupView(CreateAPIView):
 
 class CitoyenSignupView(APIView):
     def post(self, request):
-        serializer = CitoyenSignupSerializer(data=request.data)
+
+
+        data = request.data.copy()
+        print("RAW request.data:", request.data)
+        data = {key: value[0] if isinstance(value, list) else value for key, value in data.lists()}  # plain dict
+        print("Processed data:", data)
+        if "user" in data and isinstance(data["user"], str):
+            try:
+                data["user"] = json.loads(data["user"])
+            except json.JSONDecodeError:
+                return Response({"user": ["Invalid JSON format"]}, status=400)
+
+        serializer = CitoyenSignupSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response({"message": "citoyen created successfully"}, status=status.HTTP_201_CREATED)

@@ -16,7 +16,7 @@ from datetime import date
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['first_name','last_name', 'email', 'password', 'role']
+        fields = ['first_name','last_name', 'email', 'password','telephone','role']
         extra_kwargs = {'password': {'write_only': True}}
 
     def validate_first_name(self, first_name):
@@ -54,7 +54,7 @@ class CitoyenSignupSerializer(serializers.ModelSerializer):
     user = CustomUserSerializer()
     class Meta:
         model = CitoyenProfile
-        fields = ['user', 'address', 'dateOfBirth', 'cin']
+        fields = ['user', 'address', 'dateOfBirth', 'cin'] #omitted the cin since im still working on how to add it 
         
 
     def validate_dateOfBirth(self, value):

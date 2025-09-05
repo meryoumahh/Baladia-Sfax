@@ -38,7 +38,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(max_length=150)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=128)  # optional, AbstractBaseUser already has password
-    
+    telephone = models.CharField(max_length=20, blank=True, null=True)
 
     dateOfCreation = models.DateTimeField(auto_now_add=True)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="citoyen")
