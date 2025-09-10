@@ -11,7 +11,7 @@ const MainButton = ({
 }) => {
   return (
     <Link href={href}>
-      <div className='bg-blue-500 text-white text-xl font-bold py-2 px-3 rounded-full flex items-center gap-2'>
+      <div className='bg-amber-50 text-neutral-900 font-medium font-inter text-s sm:text-l py-1 px-3 w-fit rounded-full flex items-center '>
         {children}
       </div>
     </Link>

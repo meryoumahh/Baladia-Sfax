@@ -1,9 +1,9 @@
 "use client";
 import React, { useState } from "react";
-import StepTwoRegisterClient from "@/components/StepTwoRegisterClient";
-import StepOneRegister from "@/components/StepOneRegister";
+import StepTwoRegisterClient from "@/components/MainPageCom/AuthenticationCom/StepTwoRegisterClient";
+import StepOneRegister from "@/components/MainPageCom/AuthenticationCom/StepOneRegister";
 import { registerUser, registerServiceProvider } from "../../utils/auth"; 
-import StepTwoRegisterServiceProvider from "@/components/StepTwoRegisterServiceProvider";
+import StepTwoRegisterServiceProvider from "@/components/MainPageCom/AuthenticationCom/StepTwoRegisterServiceProvider";
 
 const Page = () => {
   const [stepIndex, setStepIndex] = useState(0);

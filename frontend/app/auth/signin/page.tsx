@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from 'react'
-import MainButton from '@/components/mainButton'
+
 import { FiArrowRight } from "react-icons/fi";
 import Image from 'next/image';
 import Link from 'next/link';

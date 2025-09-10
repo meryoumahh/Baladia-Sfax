@@ -23,11 +23,35 @@ body {
     background-color: oklch(86.9% 0.022 252.894);
 
   }*/
-
-*{
+border-blue{
+  border-color: #58A0C8;
   
-  font-family: var(--font-josefin);
-
-
-
+  
 }
+
+.bg-blue1{
+  background-color: #113F67;
+  }
+.font-blue{
+  color: #58A0C8;
+  }
+.bg-blue2{
+  background-color: #58A0C8;
+}
+
+.font-gulzar {
+  font-family: var(--font-garamond);
+}
+.font-inter { 
+  font-family: var(--font-inter);
+}
+.font-josefin {
+  font-family: var(--font-josefin);
+}
+/*{
+  
+  font-family: var(--font-garamond);
+
+
+
+}*/
