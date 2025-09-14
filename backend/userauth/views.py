@@ -101,17 +101,18 @@ class UserLoginView(APIView):
         if serializer.is_valid():
             user = serializer.validated_data['user']
 
-            # Do NOT blacklist tokens here
-            tokens = OutstandingToken.objects.filter(user=user)
-            for token in tokens:
-                try:
-                    BlacklistedToken.objects.get_or_create(token=token)
-                except:
-                    pass
+            
 
             
-            refresh_token = RefreshToken.for_user(user)  # this will generate a new jti always
+            # Create new tokens
+            refresh_token = RefreshToken.for_user(user)
             access_token = str(refresh_token.access_token)
+            
+            # Debug: Print token details
+            import datetime
+            print(f"Token created at: {datetime.datetime.now()}")
+            print(f"Token expires at: {datetime.datetime.fromtimestamp(refresh_token.access_token['exp'])}")
+            print(f"Current time: {datetime.datetime.now()}")
             response = Response(
                 {
                     "user": CustomUserSerializer(user).data,
@@ -124,16 +125,18 @@ class UserLoginView(APIView):
                 key="access_token",
                 value=access_token,
                 httponly=True,
-                secure=True,
-                samesite="None",
-                max_age=None)
+                secure=False,
+                samesite="Lax",
+                max_age=7200,
+                path="/")
             response.set_cookie(
                 key="refresh_token",
                 value=str(refresh_token),
                 httponly=True,
-                secure=True,
-                samesite="None",
-                max_age=None)
+                secure=False,
+                samesite="Lax",
+                max_age=7200,
+                path="/")
             return response
 
         return Response( serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -1,80 +1,105 @@
-// Step1.tsx
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+
 interface Step1Props {
-    role: string;
-    setRole: (role: string) => void; // setter function from parent
-    
-    email: string;
-    setEmail: (email: string) => void;
+  email: string;
+  setEmail: (email: string) => void;
 
-    firstName: string;
-    setFirstName: (firstName: string) => void;
+  firstName: string;
+  setFirstName: (firstName: string) => void;
 
-    lastName: string;
-    setLastName: (lastName: string) => void;
+  lastName: string;
+  setLastName: (lastName: string) => void;
 
-    password: string;
-    setPassword: (password: string) => void;
+  password: string;
+  setPassword: (password: string) => void;
 
-    telephone: string;
-    setTelephone: (telephone: string) => void;
-
-    
+  telephone: string;
+  setTelephone: (telephone: string) => void;
 
   onNext: () => void; // callback to go to next step
 }
 
+interface ErrorState {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
+  telephone?: string;
+}
 
+const StepOneRegister = ({
+  email,
+  setEmail,
+  firstName,
+  setFirstName,
+  lastName,
+  setLastName,
+  password,
+  setPassword,
+  telephone,
+  setTelephone,
+  onNext,
+}: Step1Props) => {
+  const [error, setError] = useState<ErrorState>({});
+  const [conPassword, setConPassword] = useState("");
 
-
-const StepOneRegister = ({ role, setRole, email, setEmail, firstName, setFirstName, lastName, setLastName, password , setPassword, telephone, setTelephone, onNext } : Step1Props) => {
-  
-    const [error, setError] = useState<Record<string, string>>({});
-    // Validation function
-    const validate = () => {
-    const newErrors: Record<string, string> = {};
+  // General validation for other fields
+  const validate = () => {
+    const newErrors: ErrorState = {};
 
     // First name: required, no digits
     if (!firstName) newErrors.firstName = "First name is required";
-    else if (/\d/.test(firstName))
-      newErrors.firstName = "First name cannot contain digits";
+    else if (/\d/.test(firstName)) newErrors.firstName = "First name cannot contain digits";
 
     // Last name: required, no digits
     if (!lastName) newErrors.lastName = "Last name is required";
-    else if (/\d/.test(lastName))
-      newErrors.lastName = "Last name cannot contain digits";
+    else if (/\d/.test(lastName)) newErrors.lastName = "Last name cannot contain digits";
 
     // Email format
     if (!email) newErrors.email = "Email is required";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-      newErrors.email = "Invalid email format";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) newErrors.email = "Invalid email format";
 
     // Password: at least 8 characters
     if (!password) newErrors.password = "Password is required";
-    else if (password.length < 8)
-      newErrors.password = "Password must be at least 8 characters";
+    else if (password.length < 8) newErrors.password = "Password must be at least 8 characters";
 
     // Telephone: exactly 8 digits (Tunisia style)
-    
+    if (!telephone) newErrors.telephone = "Telephone is required";
+    else if (!/^\d{8}$/.test(telephone)) newErrors.telephone = "Telephone must be 8 digits";
+
+    // Confirm password
+    if (!conPassword) newErrors.confirmPassword = "Confirm your password";
+    else if (password !== conPassword) newErrors.confirmPassword = "Passwords do not match";
 
     setError(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-  
-  
-  
-  
-  
-  
-  
-    return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white shadow-md rounded-lg">
-      <h2 className="text-2xl font-bold text-center mb-6">Register</h2>
+
+  // Real-time password validation
+  const validatePasswords = () => {
+    setError((prev) => {
+      const newErrors = { ...prev };
+      if (!password) newErrors.password = "Password is required";
+      else if (password.length < 8) newErrors.password = "Password must be at least 8 characters";
+      else newErrors.password = "";
+
+      if (!conPassword) newErrors.confirmPassword = "Confirm your password";
+      else if (password !== conPassword) newErrors.confirmPassword = "Passwords do not match";
+      else newErrors.confirmPassword = "";
+
+      return newErrors;
+    });
+  };
+
+  return (
+    <div className="w-1/4 mx-auto mt-10 p-10 mb-10 bg-white shadow-md rounded-lg">
+      <h2 className="text-2xl font-bold text-center mb-6">Creer un compte!</h2>
       <form className="flex flex-col gap-4">
         {/* First Name */}
         <div>
-          <label className="block mb-1 font-medium">First Name</label>
+          <label className="block mb-1 font-medium text-start mx-5">Prénom :</label>
           <input
             type="text"
             value={firstName}
@@ -83,14 +108,12 @@ const StepOneRegister = ({ role, setRole, email, setEmail, firstName, setFirstNa
               error.firstName ? "border-red-500 focus:ring-red-400" : "focus:ring-blue-400"
             }`}
           />
-          {error.firstName && (
-            <p className="text-red-500 text-sm mt-1">{error.firstName}</p>
-          )}
+          {error.firstName && <p className="text-red-500 text-sm mt-1">{error.firstName}</p>}
         </div>
 
         {/* Last Name */}
         <div>
-          <label className="block mb-1 font-medium">Last Name</label>
+          <label className="block mb-1 font-medium text-start mx-5">Nom :</label>
           <input
             type="text"
             value={lastName}
@@ -99,14 +122,12 @@ const StepOneRegister = ({ role, setRole, email, setEmail, firstName, setFirstNa
               error.lastName ? "border-red-500 focus:ring-red-400" : "focus:ring-blue-400"
             }`}
           />
-          {error.lastName && (
-            <p className="text-red-500 text-sm mt-1">{error.lastName}</p>
-          )}
+          {error.lastName && <p className="text-red-500 text-sm mt-1">{error.lastName}</p>}
         </div>
 
         {/* Email */}
         <div>
-          <label className="block mb-1 font-medium">Email</label>
+          <label className="block mb-1 font-medium text-start mx-5">Email :</label>
           <input
             type="email"
             value={email}
@@ -115,30 +136,48 @@ const StepOneRegister = ({ role, setRole, email, setEmail, firstName, setFirstNa
               error.email ? "border-red-500 focus:ring-red-400" : "focus:ring-blue-400"
             }`}
           />
-          {error.email && (
-            <p className="text-red-500 text-sm mt-1">{error.email}</p>
-          )}
+          {error.email && <p className="text-red-500 text-sm mt-1">{error.email}</p>}
         </div>
 
         {/* Password */}
         <div>
-          <label className="block mb-1 font-medium">Password</label>
+          <label className="block mb-1 font-medium text-start mx-5">Mot de passe :</label>
           <input
             type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              validatePasswords();
+            }}
             className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
               error.password ? "border-red-500 focus:ring-red-400" : "focus:ring-blue-400"
             }`}
           />
-          {error.password && (
-            <p className="text-red-500 text-sm mt-1">{error.password}</p>
+          {error.password && <p className="text-red-500 text-sm mt-1">{error.password}</p>}
+        </div>
+
+        {/* Confirm Password */}
+        <div>
+          <label className="block mb-1 font-medium text-start mx-5">Confirmer mot de passe :</label>
+          <input
+            type="password"
+            value={conPassword}
+            onChange={(e) => {
+              setConPassword(e.target.value);
+              validatePasswords();
+            }}
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+              error.confirmPassword ? "border-red-500 focus:ring-red-400" : "focus:ring-blue-400"
+            }`}
+          />
+          {error.confirmPassword && (
+            <p className="text-red-500 text-sm mt-1">{error.confirmPassword}</p>
           )}
         </div>
 
         {/* Telephone */}
         <div>
-          <label className="block mb-1 font-medium">Telephone</label>
+          <label className="block mb-1 font-medium text-start mx-5">Numéro de Téléphone :</label>
           <input
             type="text"
             value={telephone}
@@ -147,50 +186,16 @@ const StepOneRegister = ({ role, setRole, email, setEmail, firstName, setFirstNa
               error.telephone ? "border-red-500 focus:ring-red-400" : "focus:ring-blue-400"
             }`}
           />
-          {error.telephone && (
-            <p className="text-red-500 text-sm mt-1">{error.telephone}</p>
-          )}
-        </div>
-
-        {/* Profile Picture 
-        <div>
-          <label className="block mb-1 font-medium">Profile Picture</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) =>
-              setProfilePicture(e.target.files ? e.target.files[0] : null)
-            }
-            className="w-full"
-          />
-        </div>*/}
-
-        {/* Role */}
-        <div>
-          <label className="block mb-1 font-medium">Role</label>
-          <select
-            value={role}
-            onChange={(e) => {
-                setRole(e.target.value)
-                console.log(e.target.value);
-            }}
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-          >
-            <option value="--">choisir</option>
-            <option value="citoyen">Citoyen</option>
-            <option value="agent">Agent</option>
-          </select>
+          {error.telephone && <p className="text-red-500 text-sm mt-1">{error.telephone}</p>}
         </div>
 
         {/* Submit */}
         <button
           type="button"
-          onClick={
-            
-            onNext
-
-          }
-          className="mt-4 bg-blue-500 text-white font-bold py-2 rounded-md hover:bg-blue-600 transition-colors"
+          onClick={() => {
+            if (validate()) onNext();
+          }}
+          className="mt-4 bg-[#113F67] text-white font-bold py-2 hover:bg-[#58A0C8] rounded-3xl transition-colors"
         >
           Next
         </button>
@@ -198,4 +203,5 @@ const StepOneRegister = ({ role, setRole, email, setEmail, firstName, setFirstNa
     </div>
   );
 };
+
 export default StepOneRegister;

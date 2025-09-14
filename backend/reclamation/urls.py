@@ -1,12 +1,26 @@
 from django.urls import path
 from .views import (
     ReclamationCreateView,
-    UserReclamationListView
+    ReclamationListView,
+    ReclamationStatusUpdateView,
+    ReclamationAssignAgentView,
+    ReclamationListAgentView,
+    ReclamationDeleteView,
+    ReclamationUpdateView
 )
 
 urlpatterns = [
     path('create/', ReclamationCreateView.as_view(), name='reclamation-create'),
-    path('user-reclamations/', UserReclamationListView.as_view(), name='user-reclamations-list'),
+    path('user-reclamations/', ReclamationListView.as_view(), name='user-reclamations-list'),
+    path('status/<int:pk>/', ReclamationStatusUpdateView.as_view(), name='update-reclamation-status'),
+    path('assignAgent/<int:pk>/', ReclamationAssignAgentView.as_view(), name='update-reclamation-agent'),
+    #path('list/', ReclamationListView.as_view(), name='reclamation-list'),
+    path('agent-reclamation-list/', ReclamationListAgentView.as_view(), name='reclamation-list-agent'),
+    #path('create/', ReclamationCreateView.as_view(), name='reclamation-create'),
+    path('update/<int:pk>/', ReclamationUpdateView.as_view(), name='reclamation-update'),
+    path('delete/<int:pk>/', ReclamationDeleteView.as_view(), name='reclamation-delete'),
+    #path('agent-status/<int:pk>/', ReclamationAgentStatusUpdateView.as_view(), name='reclamation-agent-status-update'),
+
 #path('<int:pk>/update/', ReclamationUpdateView.as_view(), name='reclamation-update'),
 #path('<int:pk>/delete/', ReclamationDeleteView.as_view(), name='reclamation-delete'),
 #path('<int:pk>/agent-status/', ReclamationAgentStatusUpdateView.as_view(), name='reclamation-agent-status-update'),

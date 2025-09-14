@@ -9,7 +9,7 @@ const Page = () => {
   const [stepIndex, setStepIndex] = useState(0);
 
   // common infos
-  const [role, setRole] = useState("client");
+  const [role, setRole] = useState("citoyen");
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -142,11 +142,11 @@ const Page = () => {
 
   // ✅ Correct place for return
   return (
-    <div>
+    <div className="bg-contain bg-center  min-h-screen bg-[#113F67] flex flex-col justify-center items-center" // full viewport height
+          style={{ backgroundImage: "url('/images/wordswhite.png')" }}>
       {stepIndex === 0 && (
         <StepOneRegister
-          role={role}
-          setRole={setRole}
+          
           email={email}
           setEmail={setEmail}
           firstName={firstName}
@@ -183,15 +183,7 @@ const Page = () => {
         />
       )}
 
-      {stepIndex === 1 && role.toLowerCase() === "agent" && (
-        <StepTwoRegisterServiceProvider
-        
-          serviceCategory={serviceCategory}
-          setServiceCategory={setServiceCategory}
-          errors={{}}
-          onSubmit={handleServiceProviderSubmit}
-        />
-      )}
+      
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import axios from "axios";
-const API_URL = "http://127.0.0.1:8000/api/auth/";
+const API_URL = "http://localhost:8000/api/auth/";
 axios.defaults.withCredentials = true; 
 
 export const registerUser = async (
@@ -50,6 +50,7 @@ export const registerUser = async (
             headers: {
                 "Content-Type": "multipart/form-data",
             },
+            withCredentials: true
             });
              
 
@@ -96,8 +97,9 @@ export const registerServiceProvider = async (
             location: location,
             serviceCategory: serviceCategory,
         };
-        const response = await axios.post(`${API_URL}agent/signup/`, data,
-                );
+        const response = await axios.post(`${API_URL}agent/signup/`, data, {
+            withCredentials: true
+        });
         alert(
       "INFO SENT: \n" +
         JSON.stringify(data, null, 2)
@@ -161,8 +163,9 @@ export const logoutUser = async () => {
 
 export const getUserInfo = async () => {
     try {
-        const response = await axios.get(`${API_URL}user-info/`, {withCredentials: true}
-        )
+        const response = await axios.get(`${API_URL}user-info/`, {
+            withCredentials: true
+        })
         return response.data;
     }
     catch (e) {
@@ -172,9 +175,9 @@ export const getUserInfo = async () => {
 }
 export const refreshToken= async () => {
     try {
-        const response = await axios.post(`${API_URL}refresh/`,null, 
-            {withCredentials: true}
-        )
+        const response = await axios.post(`${API_URL}refresh/`, null, {
+            withCredentials: true
+        })
         return response.data;
     }
     catch (e) {
@@ -198,9 +201,9 @@ export const startTokenRefresh = () => {
 
 export const getAgentList = async () => {
     try {
-        const response = await axios.get(`${API_URL}listAgent/`,
-            {withCredentials: true}
-        )
+        const response = await axios.get(`${API_URL}listAgent/`, {
+            withCredentials: true
+        })
         return response.data;
     }
     catch (e) {

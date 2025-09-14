@@ -1,35 +1,45 @@
-// StepTwoRegisterClient.tsx
 "use client";
 import React, { useState } from "react";
+
 interface Step2Props {
-    address: string;
-    setAddress: (email: string) => void; // setter function from parent
-    
-    dateOfBirth: string;    
-    setDateOfBirth: (dateOfBirth: string) => void;
+  address: string;
+  setAddress: (address: string) => void;
 
+  dateOfBirth: string;
+  setDateOfBirth: (dateOfBirth: string) => void;
 
+  telephone: string;
+  setTelephone: (telephone: string) => void;
 
-    telephone: string;
-    setTelephone: (telephone: string) => void;
+  cin: File | null;
+  setCin: (cin: File | null) => void;
 
-    cin: File | null;
-    setCin: (cin: File | null) => void;
-
-
-    onSubmit: () => void; // callback to submit the form
-  
+  onSubmit: () => void; // callback to submit the form
 }
-interface PreferenceOption {
-    value: string;
-    label: string;
-}
-const StepTwoRegisterClient = ({ address, setAddress, dateOfBirth, setDateOfBirth, telephone, setTelephone, cin, setCin,  onSubmit  }: Step2Props) => {
-    const [errors, setErrors] = useState<Record<string, string>>({});
-    
 
-    const validate = () => {
-    const newErrors: Record<string, string> = {};
+interface ErrorState {
+  address?: string;
+  dateOfBirth?: string;
+  telephone?: string;
+  cin?: string;
+}
+
+const StepTwoRegisterClient = ({
+  address,
+  setAddress,
+  dateOfBirth,
+  setDateOfBirth,
+  telephone,
+  setTelephone,
+  cin,
+  setCin,
+  onSubmit,
+}: Step2Props) => {
+  const [errors, setErrors] = useState<ErrorState>({});
+
+  // Validation function
+  const validate = () => {
+    const newErrors: ErrorState = {};
 
     if (!address) newErrors.address = "Address is required";
 
@@ -39,28 +49,49 @@ const StepTwoRegisterClient = ({ address, setAddress, dateOfBirth, setDateOfBirt
     else if (!/^[0-9]{8}$/.test(telephone))
       newErrors.telephone = "Telephone must be 8 digits";
 
+    if (!cin) newErrors.cin = "CIN is required";
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-    const validation = async() => {
-        if (!validate()) return;
-        alert("Step 2 is valid! Submitting data...");}
+  // Real-time validation on field change
+  const handleAddressChange = (value: string) => {
+    setAddress(value);
+    if (!value) setErrors((prev) => ({ ...prev, address: "Address is required" }));
+    else setErrors((prev) => ({ ...prev, address: "" }));
+  };
 
+  const handleDateChange = (value: string) => {
+    setDateOfBirth(value);
+    if (!value) setErrors((prev) => ({ ...prev, dateOfBirth: "Date of birth is required" }));
+    else setErrors((prev) => ({ ...prev, dateOfBirth: "" }));
+  };
 
-     // Fixed handlePreferenceChange function
-    
+  const handleTelephoneChange = (value: string) => {
+    setTelephone(value);
+    if (!value) setErrors((prev) => ({ ...prev, telephone: "Telephone is required" }));
+    else if (!/^[0-9]{8}$/.test(value))
+      setErrors((prev) => ({ ...prev, telephone: "Telephone must be 8 digits" }));
+    else setErrors((prev) => ({ ...prev, telephone: "" }));
+  };
+
+  const handleCinChange = (file: File | null) => {
+    setCin(file);
+    if (!file) setErrors((prev) => ({ ...prev, cin: "CIN is required" }));
+    else setErrors((prev) => ({ ...prev, cin: "" }));
+  };
 
   // Helper function to get maximum allowed date (18 years ago from today)
   const getMaxDate = () => {
     const today = new Date();
     const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
-    return maxDate.toISOString().split('T')[0];
+    return maxDate.toISOString().split("T")[0];
   };
 
   return (
     <div className="max-w-md mx-auto mt-10 p-6 bg-white shadow-md rounded-lg">
-      <h2 className="text-2xl font-bold text-center mb-6">Inscription Client</h2>
+      <h2 className="text-2xl font-bold text-center mb-6"></h2>
       <form className="flex flex-col gap-4">
         {/* Address */}
         <div>
@@ -68,40 +99,35 @@ const StepTwoRegisterClient = ({ address, setAddress, dateOfBirth, setDateOfBirt
           <input
             type="text"
             value={address}
-            onChange={(e) => setAddress(e.target.value)}
+            onChange={(e) => handleAddressChange(e.target.value)}
             className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
               errors.address ? "border-red-500 focus:ring-red-400" : "focus:ring-blue-400"
             }`}
           />
-          {errors.address && (
-            <p className="text-red-500 text-sm mt-1">{errors.address}</p>
-          )}
+          {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
         </div>
-          <div>
+
+        {/* CIN */}
+        <div>
           <label className="block mb-1 font-medium">Carte CIN</label>
           <input
             type="file"
             accept="image/*"
-            onChange={(e) => {
-              if (e.target.files && e.target.files[0]) {
-                setCin(e.target.files[0]);
-              }
-            }}
+            onChange={(e) => handleCinChange(e.target.files ? e.target.files[0] : null)}
             className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-              errors.profilePicture ? "border-red-500 focus:ring-red-400" : "focus:ring-blue-400"
+              errors.cin ? "border-red-500 focus:ring-red-400" : "focus:ring-blue-400"
             }`}
           />
-          {errors.profilePicture && (
-            <p className="text-red-500 text-sm mt-1">{errors.profilePicture}</p>
-          )}
+          {errors.cin && <p className="text-red-500 text-sm mt-1">{errors.cin}</p>}
         </div>
+
         {/* Date of Birth */}
         <div>
-          <label className="block mb-1 font-medium">Date of Birth</label>
+          <label className="block mb-1 font-medium">Date de naissance</label>
           <input
             type="date"
             value={dateOfBirth}
-            onChange={(e) => setDateOfBirth(e.target.value)}
+            onChange={(e) => handleDateChange(e.target.value)}
             max={getMaxDate()}
             className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
               errors.dateOfBirth ? "border-red-500 focus:ring-red-400" : "focus:ring-blue-400"
@@ -110,46 +136,23 @@ const StepTwoRegisterClient = ({ address, setAddress, dateOfBirth, setDateOfBirt
           {errors.dateOfBirth && (
             <p className="text-red-500 text-sm mt-1">{errors.dateOfBirth}</p>
           )}
-          <p className="text-gray-500 text-xs mt-1">You must be at least 18 years old</p>
+          <p className="text-gray-500 text-xs mt-1">l'age supérieur à 18 ans</p>
         </div>
 
         
-        
-
-
-
         {/* Submit Button */}
         <button
           type="button"
-          onClick={onSubmit}
-          className="mt-4 bg-blue-500 text-white font-bold py-2 rounded-md hover:bg-blue-600 transition-colors"
+          onClick={() => {
+            if (validate()) onSubmit();
+          }}
+          className="mt-4 bg-[#113F67] text-white font-bold py-2 hover:bg-[#58A0C8] transition-colors rounded-full"
         >
           Next
         </button>
       </form>
     </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /*<div>
-      <input
-        value={address}
-        onChange={(e) => setAddress(e.target.value)}
-        placeholder="Enter email"
-      />
-      <button onClick={() => alert(`Email: ${address}`)}>Submit</button>
-    </div>*/
   );
 };
+
 export default StepTwoRegisterClient;
