@@ -1,6 +1,6 @@
 import axios from "axios";
 const API_URL = "http://127.0.0.1:8000/api/auth/";
-
+axios.defaults.withCredentials = true; 
 
 export const registerUser = async (
     first_name: string,
@@ -133,8 +133,9 @@ export const loginUser = async (email: string, password: string) => {
             {withCredentials: true }
         );
         console.log(
-            "email" + email + " password " + password
+            "email" + email + " password " + password 
         )
+        startTokenRefresh();
         return response.data;
     }
     catch (e){
@@ -142,10 +143,25 @@ export const loginUser = async (email: string, password: string) => {
     }
 }
 
+export const logoutUser = async () => {
+    try {
+        const response = await axios.post(`${API_URL}logout/`, null,
+            {withCredentials: true}
+        )
+        alert("user logout worked! " )
+        return response.data;
+    }
+    catch (e) {
+        throw new Error("Logout failed!");
+    }
+    
+}
+
+
+
 export const getUserInfo = async () => {
     try {
-        const response = await axios.get(`${API_URL}user-info/`,
-            {withCredentials: true}
+        const response = await axios.get(`${API_URL}user-info/`, {withCredentials: true}
         )
         return response.data;
     }
@@ -154,16 +170,42 @@ export const getUserInfo = async () => {
     }
     
 }
-
-export const logoutUser = async () => {
+export const refreshToken= async () => {
     try {
-        const response = await axios.post(`${API_URL}logout/`, null,
+        const response = await axios.post(`${API_URL}refresh/`,null, 
             {withCredentials: true}
         )
         return response.data;
     }
     catch (e) {
-        throw new Error("Logout failed!");
+        throw new Error("refreshing  failed!");
+    }
+    
+}
+// Call this after login
+export const startTokenRefresh = () => {
+  // Refresh every 110 minutes (just before expiry)
+  setInterval(async () => {
+    try {
+      await refreshToken();
+      alert("Access token refreshed automatically ✅");
+    } catch (err) {
+      alert("Auto refresh failed ❌");
+    }
+  }, 110 * 60 * 1000); // 110 minutes in ms
+};
+
+
+export const getAgentList = async () => {
+    try {
+        const response = await axios.get(`${API_URL}listAgent/`,
+            {withCredentials: true}
+        )
+        return response.data;
+    }
+    catch (e) {
+        console.error("Error fetching Agents:", e);
+        throw new Error("Getting agents failed!");
     }
     
 }

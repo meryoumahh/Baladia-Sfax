@@ -1,19 +1,31 @@
 "use client";
-import React, { useState } from 'react'
+import React, { useState,useEffect } from 'react'
 
 import { FiArrowRight } from "react-icons/fi";
 import Image from 'next/image';
 import Link from 'next/link';
 import { useNavigate } from "react-router-dom";
 
-
+import { useRouter } from "next/navigation";
 import { loginUser , getUserInfo } from "../../utils/auth";
 
 const page = () => {
   /*const navigate = useNavigate();*/
   const [email, setemail] = useState('')
   const [password, setPassword] = useState('')
+  const [user, setUser] = useState("")
+  const router = useRouter();
 
+
+    useEffect(() => {
+    const getUser  = async () => {
+      const userDetails = await getUserInfo()
+        if (userDetails){
+          setUser(userDetails)
+        }
+    }
+    getUser()
+  }, [])
   const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
 
@@ -24,9 +36,30 @@ const page = () => {
 
   console.log({ email, password });
 
+  
   try {
     await loginUser(email, password);
     alert("Login successful");
+    const userDetails = await getUserInfo();
+      if (userDetails) {
+        setUser(userDetails);
+        alert("Login successful");
+      }
+       
+      if(userDetails.is_staff ===true){
+        alert(userDetails.is_staff)
+        router.push("../../Dashboard/Admin")
+      }else if(userDetails.role ==='agent'){
+        alert(userDetails.role)
+        alert(userDetails.is_staff)
+        router.push("../../Dashboard/Agent")
+      }else if (userDetails.role ==='citoyen'){
+        alert(userDetails.is_staff)
+        alert(userDetails.role)
+        router.push("../../Dashboard/citoyen")
+      }
+    alert("Login successful");
+
     
   } catch (e) {
     alert("Login failed hehe");

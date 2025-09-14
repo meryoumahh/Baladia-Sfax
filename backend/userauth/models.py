@@ -41,7 +41,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     telephone = models.CharField(max_length=20, blank=True, null=True)
 
     dateOfCreation = models.DateTimeField(auto_now_add=True)
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="citoyen")
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="admin")
 
     # Django auth fields
     is_active = models.BooleanField(default=True)
@@ -76,11 +76,11 @@ class CitoyenProfile(models.Model):
 
     
         
-    telephone = models.CharField(max_length=20, blank=True, null=True)
+   # telephone = models.CharField(max_length=20, blank=True, null=True)
     address = models.CharField(max_length=255, default="No address provided")
     dateOfBirth = models.DateField( default=timezone.now)
-    cin = models.ImageField(upload_to="cins/", blank=True, null=True, default="default_cin.jpg")
-    
+    cin = models.ImageField(upload_to="cins/", blank=True, null=True,default="cins/default_cin.png")
+    isValid = models.BooleanField(default=False)
     
     
 class AgentProfile(models.Model):

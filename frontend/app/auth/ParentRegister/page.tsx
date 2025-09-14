@@ -169,7 +169,7 @@ const Page = () => {
         />
       )}
 
-      {stepIndex === 1 && role.toLowerCase() === "client" && (
+      {stepIndex === 1 && role.toLowerCase() === "citoyen" && (
         <StepTwoRegisterClient
           address={address}
           setAddress={setAddress}
@@ -183,7 +183,7 @@ const Page = () => {
         />
       )}
 
-      {stepIndex === 1 && role.toLowerCase() !== "client" && (
+      {stepIndex === 1 && role.toLowerCase() === "agent" && (
         <StepTwoRegisterServiceProvider
         
           serviceCategory={serviceCategory}
