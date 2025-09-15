@@ -53,7 +53,7 @@ export default function Home() {
           </button>
         </div>
       )}
-      <SectionOne/>
+      <SectionOne user={user} redirectToDashboard={redirectToDashboard}/>
       <SectionTwo />
       <SectionThree/>
       <Footer/>

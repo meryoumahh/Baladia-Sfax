@@ -2,7 +2,24 @@ import React from 'react'
 import Link from 'next/link'
 import MainButton from '../../MainButton'
 import SecondButton from '../../SecondButton'
-const NavBar = () => {
+import { logoutUser } from '../../../app/utils/auth'
+import { useRouter } from 'next/navigation'
+
+interface NavBarProps {
+  user?: any;
+}
+
+const NavBar = ({ user }: NavBarProps) => {
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+      window.location.reload();
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
   return (
     <nav className=" shadow-sm  w-full my-0">
       <div className=" mx-auto px-4 py-4 flex justify-between items-center align-middle">
@@ -18,7 +35,16 @@ const NavBar = () => {
           <Link href="/services" className="hover:text-[#58A0C8] text-amber-50 font-inter font-medium text-s sm:text-l">Services</Link>
           <Link href="/contact" className="hover:text-[#58A0C8] text-amber-50 font-inter font-medium text-s sm:text-l">Contact</Link>
           <SecondButton href="/register">Reclamer</SecondButton>
-          <MainButton href="/auth/signin">Se Connecter</MainButton>
+          {user ? (
+            <button 
+              onClick={handleLogout}
+              className="bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 font-inter font-medium text-s sm:text-l"
+            >
+              Se Déconnecter
+            </button>
+          ) : (
+            <MainButton href="/auth/signin">Se Connecter</MainButton>
+          )}
           
         </div>
       </div>

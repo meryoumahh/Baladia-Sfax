@@ -5,7 +5,13 @@ import Link from 'next/link'
 import NavBar from './NavBar'
 import SpecialButtons from './SpecialButtons'
 import InfoBar from './InfoBar'
-const SectionOne = () => {
+
+interface SectionOneProps {
+  user?: any;
+  redirectToDashboard?: (user: any) => void;
+}
+
+const SectionOne = ({ user, redirectToDashboard }: SectionOneProps) => {
   return (
     <>
     <InfoBar />
@@ -14,7 +20,7 @@ const SectionOne = () => {
   style={{ backgroundImage: "url('/images/wordsWhite.png')" }}
 >
   
-  <NavBar  />
+  <NavBar user={user} />
   <div className="flex justify-center items-center  mt-auto sm:mt-auto ">
     <div className='bg-amber-50 w-5xl  rounded-t-4xl pt-20 px-20 flex flex-col justify-center gap-4 sm:gap-8 mt-5 sm:mt-10 mx-20'>
         <div className='flex flex-col  sm:flex-row justify-items-start pb-4 sm:pb-5' >
@@ -27,13 +33,22 @@ const SectionOne = () => {
                 des mises à jour de nos agents dédiés.
             </h3>
          <div className='flex gap-1 justify-center items-center pb-10 sm:pb-20'>
-            <SpecialButtons variant="main" href="/connecter">
+            {user ? (
+              <SpecialButtons 
+                variant="main" 
+                href="#" 
+                onClick={() => redirectToDashboard && redirectToDashboard(user)}
+              >
+                Voir Tableau de Bord
+              </SpecialButtons>
+            ) : (
+              <SpecialButtons variant="main" href="/auth/signin">
                 Se Connecter
-            </SpecialButtons>
-            <SpecialButtons variant="sec" href="/connecter">
+              </SpecialButtons>
+            )}
+            <SpecialButtons variant="sec" href="/register">
                 Reclamer
             </SpecialButtons>
-            
         </div>
     </div>  
 </div>
