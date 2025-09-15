@@ -1,13 +1,14 @@
-import type { Metadata } from "next";
+"use client";
 import { Geist, Geist_Mono, Josefin_Slab , EB_Garamond , Inter  } from "next/font/google";
+import { useEffect, useState } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
+import { getUserInfo } from './utils/auth';
 import "./globals.css";
-
-
 
 const josefin = Josefin_Slab({
   variable: "--font-josefin",
   subsets: ["latin"],
-  weight: ["400", "700"], // choose the weights you need
+  weight: ["400", "700"],
 });
 
 const garamond = EB_Garamond({
@@ -32,16 +33,54 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Reclamation App",
-  description: "Created with love <3",
-};
-
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    checkSession();
+  }, []);
+
+  const checkSession = async () => {
+    try {
+      const userInfo = await getUserInfo();
+      if (userInfo && pathname === '/auth/signin') {
+        redirectToDashboard(userInfo);
+      }
+    } catch (error) {
+      // No session, continue normally
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const redirectToDashboard = (user: any) => {
+    if (user.is_staff) {
+      router.push('/Dashboard/Admin');
+    } else if (user.role === 'agent') {
+      router.push('/Dashboard/Agent');
+    } else if (user.role === 'citoyen') {
+      router.push('/Dashboard/citoyen');
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <html lang="en">
+        <body className={`${geistSans.variable} ${geistMono.variable} ${garamond.variable} ${inter.variable} ${josefin.variable} antialiased`}>
+          <div className="flex justify-center items-center h-screen">
+            <div>Loading...</div>
+          </div>
+        </body>
+      </html>
+    );
+  }
+
   return (
     <html lang="en">
       <body

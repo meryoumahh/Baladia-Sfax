@@ -8,17 +8,36 @@ const page = () => {
   const [email, setemail] = useState<string>("")
   const [password, setPassword] = useState<string>("")
   const [user, setUser] = useState<any>("")
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    const getUser  = async () => {
-      const userDetails = await getUserInfo()
-      if (userDetails){
-        setUser(userDetails)
+    checkExistingSession();
+  }, []);
+
+  const checkExistingSession = async () => {
+    try {
+      const userDetails = await getUserInfo();
+      if (userDetails) {
+        redirectToDashboard(userDetails);
+        return;
       }
+    } catch (error) {
+      // No existing session, show login form
+    } finally {
+      setIsLoading(false);
     }
-    getUser()
-  }, [])
+  };
+
+  const redirectToDashboard = (userDetails: any) => {
+    if (userDetails.is_staff) {
+      router.push("../../LandingPage/Admin");
+    } else if (userDetails.role === 'agent') {
+      router.push("../../LandingPage/Agent");
+    } else if (userDetails.role === 'citoyen') {
+      router.push("../../LandingPage/Citoyen");
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,20 +52,21 @@ const page = () => {
       const userDetails = await getUserInfo();
       if(userDetails) {
         setUser(userDetails);
-      }
-
-      if(userDetails.is_staff){
-        router.push("../../Dashboard/Admin")
-      } else if(userDetails.role ==='agent'){
-        router.push("../../Dashboard/Agent")
-      } else if(userDetails.role ==='citoyen'){
-        router.push("../../Dashboard/citoyen")
+        redirectToDashboard(userDetails);
       }
     } catch (e) {
       alert("Login failed");
       console.error(e);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen bg-amber-50">
+        <div>Checking session...</div>
+      </div>
+    );
+  }
 
   return (
     <main className="bg-contain bg-center  h-screen bg-amber-50 flex flex-col justify-center items-center "

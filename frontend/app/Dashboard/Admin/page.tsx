@@ -1,35 +1,52 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { getUserInfo, logoutUser, getAgentList } from '../../utils/auth';
 import Agents from '@/components/Admindashboard/Agents';
 
 interface User {
   first_name: string;
   email: string;
+  is_staff: boolean;
 }
 
-
 const Page = () => {
-
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
-    const getuser = async () => {
-      const userDetails = await getUserInfo();
-      if (userDetails) setUser(userDetails);
-    };
-    getuser();
+    verifyAdminAccess();
   }, []);
 
- 
+  const verifyAdminAccess = async () => {
+    try {
+      const userDetails = await getUserInfo();
+      if (!userDetails || !userDetails.is_staff) {
+        router.push('/auth/signin');
+        return;
+      }
+      setUser(userDetails);
+    } catch (error) {
+      router.push('/auth/signin');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleLogOut = async () => {
     await logoutUser();
-    window.location.href = "/";
+    router.push("/");
   };
 
-
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div>Verifying access...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4">
@@ -45,7 +62,6 @@ const Page = () => {
         Logout
       </button>
       <Agents/>
-      
     </div>
   );
 };

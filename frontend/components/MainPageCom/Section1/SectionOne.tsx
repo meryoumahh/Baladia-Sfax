@@ -26,7 +26,7 @@ const SectionOne = () => {
                 Suivez l’avancement en temps réel et recevez 
                 des mises à jour de nos agents dédiés.
             </h3>
-        <div className='flex gap-1 justify-center items-center pb-10 sm:pb-20'>
+         <div className='flex gap-1 justify-center items-center pb-10 sm:pb-20'>
             <SpecialButtons variant="main" href="/connecter">
                 Se Connecter
             </SpecialButtons>

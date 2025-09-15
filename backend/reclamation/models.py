@@ -5,14 +5,14 @@ import userauth.models as userauth
 # Create your models here.
 class Reclamation(models.Model):
     CATEGORY_CHOICES = [
-        ('infrastructures_critiques', 'Infrastructures critiques'),
-        ('environnement_proprete', 'Environnement et propreté'),
-        ('energie_electricite', 'Énergie et électricité'),
-        ('assainissement_eau', 'Assainissement et eau'),
-        ('transport_stationnement', 'Transport et stationnement'),
-        ('trottoirs_mobilite_douce', 'Trottoirs et mobilité douce'),
-        ('voirie_routes', 'Voirie et routes'),
-        ('eclairage_public', 'Éclairage public'),
+        ('infrastructures critiques', 'Infrastructures critiques'),
+        ('environnement proprete', 'Environnement et propreté'),
+        ('energie electricite', 'Énergie et électricité'),
+        ('assainissement eau', 'Assainissement et eau'),
+        ('transport stationnement', 'Transport et stationnement'),
+        ('trottoirs mobilite douce', 'Trottoirs et mobilité douce'),
+        ('voirie routes', 'Voirie et routes'),
+        ('eclairage public', 'Éclairage public'),
     ]
 
     STATUS_CHOICES = [
