@@ -6,7 +6,8 @@ from .views import (
     ReclamationAssignAgentView,
     ReclamationListAgentView,
     ReclamationDeleteView,
-    ReclamationUpdateView
+    ReclamationUpdateView,
+    get_user_stats
 )
 
 urlpatterns = [
@@ -19,6 +20,7 @@ urlpatterns = [
     #path('create/', ReclamationCreateView.as_view(), name='reclamation-create'),
     path('update/<int:pk>/', ReclamationUpdateView.as_view(), name='reclamation-update'),
     path('delete/<int:pk>/', ReclamationDeleteView.as_view(), name='reclamation-delete'),
+    path('stats/', get_user_stats, name='user-stats'),
     #path('agent-status/<int:pk>/', ReclamationAgentStatusUpdateView.as_view(), name='reclamation-agent-status-update'),
 
 #path('<int:pk>/update/', ReclamationUpdateView.as_view(), name='reclamation-update'),

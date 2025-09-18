@@ -1,6 +1,9 @@
 from django.shortcuts import render
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from django.db.models import Count, Q
 from .models import Reclamation
 from .serializer import ReclamationDetailsSerializer, ReclamationCreateSerializer, ReclamationDetailsAgentSerializer,ReclamationStatusSerializer,ReclamationAssignSerializer
 from django.utils import timezone
@@ -76,4 +79,44 @@ class ReclamationStatusUpdateView(generics.UpdateAPIView):
 class ReclamationAssignAgentView(generics.UpdateAPIView):
     queryset = Reclamation.objects.all()
     serializer_class = ReclamationAssignSerializer
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_stats(request):
+    user = request.user
+    
+    # Check if user has citoyen_profile
+    try:
+        citoyen_profile = user.citoyen_profile
+    except AttributeError:
+        return Response({
+            'resolu': 0,
+            'en_cours': 0, 
+            'en_attente': 0,
+            'error': 'No citoyen profile'
+        })
+    
+    # Get all reclamations for this user
+    user_reclamations = Reclamation.objects.filter(citoyen=citoyen_profile)
+    total_count = user_reclamations.count()
+    
+    # Get all status values to see what's actually in DB
+    all_statuses = list(user_reclamations.values_list('status', flat=True))
+    
+    # Count by status
+    resolu_count = user_reclamations.filter(status='Résolu').count()
+    en_cours_count = user_reclamations.filter(status='En cours').count()
+    en_attente_count = user_reclamations.filter(status='En attente').count()
+    
+    return Response({
+        'resolu': resolu_count,
+        'en_cours': en_cours_count,
+        'en_attente': en_attente_count,
+        'debug': {
+            'total_reclamations': total_count,
+            'all_statuses': all_statuses,
+            'user_id': user.id
+        }
+    })
 

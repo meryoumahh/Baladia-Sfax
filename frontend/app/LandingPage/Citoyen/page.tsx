@@ -14,10 +14,12 @@ import { FaPlus } from 'react-icons/fa';
 import InfoBar from '@/components/MainPageCom/Section1/InfoBar';
 import Link from 'next/link';
 import FormReclamation from '@/components/Reclamtion/FormReclamation';
+import { getUserStats } from '@/app/utils/reclamationStats';
 const page = () => {
   const [user, setUser] = useState<any>(null);
   const [existing, setExisting] = useState(false)
   const [showForm, setShowForm] = useState(false)
+  const [stats, setStats] = useState({ resolu: 0, en_cours: 0, en_attente: 0 })
   const router = useRouter();
 
   useEffect(() => {
@@ -30,9 +32,22 @@ const page = () => {
       if (userInfo) {
         setUser(userInfo);
         setExisting(true);
+        fetchStats();
       }
     } catch (error) {
       // User not authenticated, show landing page normally
+    }
+  };
+
+  const fetchStats = async () => {
+    try {
+      const userStats = await getUserStats();
+      console.log('Stats API Response:', userStats);
+      setStats(userStats);
+    } catch (error) {
+      console.error('Failed to fetch stats:', error);
+      // Fallback to default values if API fails
+      setStats({ resolu: 0, en_cours: 0, en_attente: 0 });
     }
   };
 
@@ -114,13 +129,13 @@ const page = () => {
                 <div className='flex gap-4 w-full justify-center items-center'>
                   <div className='w-1/4 bg-amber-50  border-1 border-gray-100 shadow-xl py-3 px-9 text-start rounded-2xl'>
                   <h1 className='text-s font-meduim text-[#113f67]'>Résolu</h1>
-                  <span className='text-2xl font-medium text-green-500'>2</span></div>
+                  <span className='text-2xl font-medium text-green-500'>{stats.resolu}</span></div>
                   <div className='w-1/4 bg-amber-50  border-1 border-gray-100 shadow-xl py-3 px-9 text-start rounded-2xl'>
                   <h1 className='text-s font-meduim text-[#113f67]'>En cours</h1>
-                  <span className='text-2xl font-medium text-amber-700'>2</span></div>
+                  <span className='text-2xl font-medium text-amber-700'>{stats.en_cours}</span></div>
                   <div className='w-1/4 bg-amber-50  border-1 border-gray-100 shadow-xl py-3 px-9 text-start rounded-2xl'>
                   <h1 className='text-s font-meduim text-[#113f67]'>En attente</h1>
-                  <span className='text-2xl font-medium text-red-500'>2</span></div>
+                  <span className='text-2xl font-medium text-red-500'>{stats.en_attente}</span></div>
                 </div>
               </div>
               )}
@@ -129,7 +144,7 @@ const page = () => {
 
 
               {showForm ? (
-                <FormReclamation onBack={() => setShowForm(false)} />
+                <FormReclamation onBack={() => { setShowForm(false); fetchStats(); }} />
               ) : (
                 <div className='flex flex-col bg-amber-50 shadow-2xl w-9/10 p-10 rounded-xl'>
                   <RecList/>

@@ -9,10 +9,17 @@ import { FiSettings } from 'react-icons/fi';
 import { FiEye  } from 'react-icons/fi';
 import { FaPen } from "react-icons/fa";
 import { FaCheckCircle } from "react-icons/fa";
+import InfoBar from '@/components/MainPageCom/Section1/InfoBar';
+import Link from 'next/link';
+import { FaHome, FaUser, FaCog, FaBars } from "react-icons/fa";
+import RecList from '@/components/Reclamtion/ReclamationList';
+
 const page = () => {
   const [user, setUser] = useState<any>(null);
   const [existing, setExisting] = useState(false)
   const router = useRouter();
+  const [collapsed, setCollapsed] = useState(false);
+  const [activeView, setActiveView] = useState('citoyens');
 
   useEffect(() => {
     checkAuthStatus();
@@ -46,66 +53,104 @@ const page = () => {
 
   return (
     <>
+      <InfoBar/>
       {user && (
-        <div className="bg-green-100 py-2 text-center border-b flex justify-between items-baseline px-20">
-          <span className="text-green-800">Rebonjour, {user.first_name}!</span>
-           <div className='flex justify-between gap-10'>
-          <button 
-            onClick={() => redirectToDashboard(user)}
-            className="ml-4 bg-green-600 text-white px-4 py-1 rounded-full mt-4 hover:bg-green-700"
-          >
-            Mon tableau de bord
-          </button>
+        <div className="w-full py-2 text-center shadow-sm flex justify-between items-center px-10 bg-blue1">
+         <Link href="/">
+            <span className="hidden sm:inline text-xl font-extrabold font-josefin font-blue">Baladia</span>
+          </Link>
+          
+          <div className='flex justify-between gap-5'>
+          <button
+              onClick={() => window.location.href = '/'}
+              className="px-3 py-1 rounded-xl text-amber-50 hover:bg-[#58A0C8] hover:text-amber-50 active:bg-[#3c92c1] transition"
+            >
+              Nouveautés
+            </button>
           <button
                 onClick={handleLogOut}
-                className="bg-red-500 text-white px-4 py-1 rounded-full mt-4"
+                className="bg-red-500 text-amber-50 px-3 py-1 rounded-xl "
             >
                 Deconnecter
           </button>
+        </div>             
+      </div> 
+      )}
+      
+      <div className="flex min-h-screen w-full">
+        {/* Left Sidebar */}
+        <div
+          className={`bg-[#58A0C8] text-white transition-all duration-300 min-h-full ${
+            collapsed ? "w-16" : "w-56"
+          }`}
+        >
+          {/* Collapse button */}
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="p-4 focus:outline-none hover:bg-[#3c92c1] w-full flex items-center"
+          >
+            <FaBars className="w-5 h-5" />
+            {!collapsed && <span className="ml-2">Collapse</span>}
+          </button>
+
+          {/* Navigation items */}
+          <nav className="mt-4">
+            <ul>
+              <li 
+                onClick={() => setActiveView('citoyens')}
+                className={`flex items-center p-4 hover:bg-[#3c92c1] cursor-pointer ${
+                  activeView === 'citoyens' ? 'bg-[#3c92c1]' : ''
+                }`}
+              >
+                <FaHome className="w-5 h-5" />
+                {!collapsed && <span className="ml-3">List Citoyens</span>}
+              </li>
+              <li 
+                onClick={() => setActiveView('agents')}
+                className={`flex items-center p-4 hover:bg-[#3c92c1] cursor-pointer ${
+                  activeView === 'agents' ? 'bg-[#3c92c1]' : ''
+                }`}
+              >
+                <FaUser className="w-5 h-5" />
+                {!collapsed && <span className="ml-3">List Agents</span>}
+              </li>
+              <li 
+                onClick={() => setActiveView('reclamations')}
+                className={`flex items-center p-4 hover:bg-[#3c92c1] cursor-pointer ${
+                  activeView === 'reclamations' ? 'bg-[#3c92c1]' : ''
+                }`}
+              >
+                <FaCog className="w-5 h-5" />
+                {!collapsed && <span className="ml-3">List Reclamations</span>}
+              </li>
+            </ul>
+          </nav>
+        </div>
+
+        {/* Main Content */}
+        <div className="flex-1">
+          <div className="flex flex-col gap-15 items-center w-full bg-blue1 min-h-full p-4"
+               style={{ backgroundImage: "url('/images/wordswhite.png')" }}>
+            {activeView === 'citoyens' && (
+              <div className="w-full text-center">
+                <h2 className="text-3xl font-bold text-white">Liste des Citoyens</h2>
+              </div>
+            )}
+            
+            {activeView === 'agents' && (
+              <div className="w-full text-center">
+                <h2 className="text-3xl font-bold text-white">Liste des Agents</h2>
+              </div>
+            )}
+            
+            {activeView === 'reclamations' && (
+              <div className="w-full">
+                <RecList/>
+              </div>
+            )}
           </div>
         </div>
-      )}
-      <div className="flex flex-col justify-center  gap-15 items-center min-h-screen w-full bg-amber-50"
-                   style={{ backgroundImage: "url('/images/wordblue.png')" }}>
-                    <div className='flex flex-col '>
-                      <h1 className='bg-[#58A0C8] text-amber-50 shadow-2xl px-5 py-2 font-bold text-3xl'>Consulter la liste de vos réclamations déposées et leurs états.</h1>
-                      <h1 className='bg-[#113f67] text-amber-50 shadow-2xl px-5 py-2 font-bold text-3xl'>Déposer de Nouvelles reclamations.</h1>
-                    </div>
-                    <div className='flex gap-5'>
-                  <button
-                    onClick={()=>{
-                      router.push("/Dashboard/Citoyen")
-                    }}
-                    className={`flex items-center justify-center gap-4 px-16 py-8 text-xl font-semibold rounded-lg bg-[#113F67] text-white hover:bg-[#58A0C8]-700 transition-colors duration-200 shadow-2xl min-w-80 h-24`}
-                  >
-                    <FiEye/>
-                    Voir Toutes les Reclamations
-                  </button>
-            
-                  <button
-                    onClick={()=>{
-                      router.push("/Dashboard/Citoyen")
-                    }}
-                    className={`flex items-center justify-center gap-4 px-16 py-8 text-xl font-semibold rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors duration-200 shadow-2xl min-w-80 h-24`}
-                  >
-                    <FaCheckCircle />
-                    Valider Citoyens
-                  </button>
-                  </div>
-                  <div className='flex gap-5'>
-                  <button
-                    onClick={()=>{
-                      router.push("/Dashboard/Citoyen")
-                    }}
-                    className={`flex items-center justify-center gap-4 px-16 py-8 text-xl font-semibold rounded-lg bg-[#58A0C8] text-white hover:bg-[#58A0C8]-700 transition-colors duration-200 shadow-2xl min-w-80 h-24`}
-                  >
-                    <FiEye/>
-                    List Agents
-                  </button>
-            
-                  
-                  </div>
-                </div>
+      </div>
     </>
   )
 }

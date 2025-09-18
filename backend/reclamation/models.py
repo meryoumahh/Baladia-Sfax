@@ -41,6 +41,6 @@ class Reclamation(models.Model):
     date_misajour = models.DateTimeField(auto_now=True)
     localization = models.CharField(max_length=255)
     picture = models.ImageField(upload_to='problems/', blank=True, null=True)
-
+    validate = models.BooleanField(default=False)
     def __str__(self):
         return f"{self.titre} - {self.get_category_display()}"
