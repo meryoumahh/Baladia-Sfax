@@ -85,15 +85,27 @@ class CitoyenProfile(models.Model):
     
 class AgentProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name="agent_profile")
+    
     class ServiceCategory(models.TextChoices):
-        LIGHT = 'LIGHT', 'LIGHT'
-        ROAD = 'ROAD', 'ROAD'
-        ALL='ALL', 'ALL'
-        # Add other categories as needed
+        LIGHT = 'LIGHT', 'Éclairage Public'
+        ROAD = 'ROAD', 'Routes & Trottoirs'
+        WATER = 'WATER', 'Eau & Assainissement'
+        SANITATION = 'SANITATION', 'Gestion des Déchets & Propreté'
+        ELECTRICITY = 'ELECTRICITY', 'Infrastructures Électriques'
+        TELECOM = 'TELECOM', 'Lignes de Télécommunication'
+        TRAFFIC = 'TRAFFIC', 'Feux & Signalisation Routière'
+        BUILDING = 'BUILDING', 'Entretien des Bâtiments Publics'
+        PARK = 'PARK', 'Parcs & Espaces Verts'
+        BRIDGE = 'BRIDGE', 'Ponts & Passerelles'
+        EMERGENCY = 'EMERGENCY', 'Réparations d’Urgence'
+        ALL = 'ALL', 'Tous Services'
+
+
     
     serviceCategory = models.CharField(
         max_length=30,
         choices=ServiceCategory.choices,
         default=ServiceCategory.ALL,
     )
+    plain_password = models.CharField(max_length=50, blank=True, null=True)  # Store plain password for admin view
 

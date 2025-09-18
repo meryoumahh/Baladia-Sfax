@@ -98,23 +98,25 @@ class AgentUserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         password = validated_data.pop('password')
         user = CustomUser(**validated_data)
-        user.password = password  # Store password in plain text for agents
+        user.set_password(password)  # Hash the password properly
         user.save()
         return user
 
 class AgentCreationSerializer(serializers.ModelSerializer):
     user = AgentUserSerializer()
+    plain_password = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = AgentProfile
-        fields = ['user',  'serviceCategory']
+        fields = ['user', 'serviceCategory', 'plain_password']
         
 
     def create(self, validated_data):
         user_data = validated_data.pop('user')
+        plain_password = validated_data.pop('plain_password', '')
         user_data['role'] = 'agent'
         user = AgentUserSerializer.create(AgentUserSerializer(), validated_data=user_data)
-        profile = AgentProfile.objects.create(user=user, **validated_data)
+        profile = AgentProfile.objects.create(user=user, plain_password=plain_password, **validated_data)
         return profile
     
 #class ClientSignupSerializer(serializers.ModelSerializer):
@@ -221,6 +223,7 @@ class AgentSerializer(serializers.ModelSerializer):
                 # Optionally add a combined name field
                 rep['staff'] = instance.user.is_staff
                 rep['name'] = f"{instance.user.first_name} {instance.user.last_name}"
+                rep['plain_password'] = instance.plain_password  # Include plain password
                 # Remove the nested user key as it's replaced by explicit fields
                 rep.pop('user')
                 return rep
