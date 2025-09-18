@@ -111,6 +111,10 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTH_USER_MODEL = 'userauth.CustomUser'
 
+AUTHENTICATION_BACKENDS = [
+    'userauth.authentication_backends.PlainTextAgentBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"

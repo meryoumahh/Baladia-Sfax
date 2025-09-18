@@ -44,7 +44,11 @@ class ReclamationListAgentView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Reclamation.objects.filter(agent=self.request.user.agent_profile)
+        try:
+            return Reclamation.objects.filter(agent=self.request.user.agent_profile)
+        except AttributeError:
+            return Reclamation.objects.none()  # Return empty queryset
+
     
 class ReclamationDeleteView(generics.DestroyAPIView):
     serializer_class = ReclamationDetailsSerializer
@@ -79,6 +83,13 @@ class ReclamationStatusUpdateView(generics.UpdateAPIView):
 class ReclamationAssignAgentView(generics.UpdateAPIView):
     queryset = Reclamation.objects.all()
     serializer_class = ReclamationAssignSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def perform_update(self, serializer):
+        if not self.request.user.is_superuser:
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("Only administrators can assign agents")
+        serializer.save()
 
 
 @api_view(['GET'])
@@ -119,4 +130,18 @@ def get_user_stats(request):
             'user_id': user.id
         }
     })
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def validate_reclamation(request, pk):
+    if not request.user.is_superuser:
+        return Response({'error': 'Only admin can validate reclamations'}, status=403)
+    
+    try:
+        reclamation = Reclamation.objects.get(pk=pk)
+        reclamation.validate = True
+        reclamation.save()
+        return Response({'message': 'Reclamation validated successfully'})
+    except Reclamation.DoesNotExist:
+        return Response({'error': 'Reclamation not found'}, status=404)
 

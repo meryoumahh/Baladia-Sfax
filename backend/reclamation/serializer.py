@@ -8,7 +8,7 @@ class ReclamationDetailsSerializer(serializers.ModelSerializer):
     agent = AgentSerializer(read_only=True)
     class Meta:
         model = Reclamation
-        fields = ['id', 'citoyen' ,'agent', 'titre', 'description', 'category', 'status', 'date_soumission', 'date_misajour', 'localization', 'picture']
+        fields = ['id', 'citoyen' ,'agent', 'titre', 'description', 'category', 'status', 'date_soumission', 'date_misajour', 'localization', 'picture', 'validate']
         read_only_fields = ['id', 'date_soumission', 'date_misajour', 'citoyen','status']
 
 
@@ -21,6 +21,8 @@ class ReclamationDetailsAgentSerializer(serializers.ModelSerializer):
 
 # For agent assignment (admins/agents assign cases)
 class ReclamationAssignSerializer(serializers.ModelSerializer):
+    agent = serializers.PrimaryKeyRelatedField(queryset=AgentProfile.objects.all())
+    
     class Meta:
         model = Reclamation
         fields = ['agent']

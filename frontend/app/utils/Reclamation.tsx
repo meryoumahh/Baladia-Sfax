@@ -55,3 +55,16 @@ export const CreateReclamation = async (
     throw new Error("reclamation failed");
     }
 }
+
+export const validateReclamation = async (id: number) => {
+    try {
+        const response = await axios.post(`${API_URL}validate/${id}/`, {}, {
+            withCredentials: true
+        });
+        return response.data;
+    }
+    catch (e) {
+        console.error("Error validating reclamation:", e);
+        throw new Error("Validation failed!");
+    }
+}

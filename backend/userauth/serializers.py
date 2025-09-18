@@ -73,8 +73,37 @@ class CitoyenSignupSerializer(serializers.ModelSerializer):
         return profile
 
 
+class AgentUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['first_name','last_name', 'email', 'password','telephone','role', 'is_staff']
+        extra_kwargs = {'password': {'write_only': True}}
+        extra_kwargs = {'is_staff': {'read_only': True}}
+    
+    def validate_first_name(self, first_name):
+        if any(char.isdigit() for char in first_name):
+            raise serializers.ValidationError("Le prénom ne peut pas contenir de chiffres.")
+        return first_name
+    
+    def validate_last_name(self, value):
+        if any(char.isdigit() for char in value):
+            raise serializers.ValidationError("Le nom ne peut pas contenir de chiffres.")
+        return value
+
+    email = serializers.EmailField(
+        required=True,
+        validators=[UniqueValidator(queryset=CustomUser.objects.all())]
+    )
+
+    def create(self, validated_data):
+        password = validated_data.pop('password')
+        user = CustomUser(**validated_data)
+        user.password = password  # Store password in plain text for agents
+        user.save()
+        return user
+
 class AgentCreationSerializer(serializers.ModelSerializer):
-    user = CustomUserSerializer()
+    user = AgentUserSerializer()
 
     class Meta:
         model = AgentProfile
@@ -84,7 +113,7 @@ class AgentCreationSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user_data = validated_data.pop('user')
         user_data['role'] = 'agent'
-        user = CustomUserSerializer.create(CustomUserSerializer(), validated_data=user_data)
+        user = AgentUserSerializer.create(AgentUserSerializer(), validated_data=user_data)
         profile = AgentProfile.objects.create(user=user, **validated_data)
         return profile
     
@@ -183,7 +212,8 @@ class AgentSerializer(serializers.ModelSerializer):
             def to_representation(self, instance):
                 rep = super().to_representation(instance)
                 # Add all needed user fields from the related user object
-                rep['id'] = instance.user.id
+                rep['id'] = instance.id  # Use AgentProfile ID, not user ID
+                rep['user_id'] = instance.user.id  # Keep user ID as separate field
                 rep['email'] = instance.user.email
                 rep['first_name'] = instance.user.first_name
                 rep['last_name'] = instance.user.last_name
@@ -206,7 +236,8 @@ class CitoyenSerializer(serializers.ModelSerializer):
             def to_representation(self, instance):
                 rep = super().to_representation(instance)
                 # Add all needed user fields from the related user object
-                rep['id'] = instance.user.id
+                rep['id'] = instance.id  # Use CitoyenProfile ID for validation
+                rep['user_id'] = instance.user.id  # Keep user ID as separate field
                 rep['email'] = instance.user.email
                 rep['first_name'] = instance.user.first_name
                 rep['last_name'] = instance.user.last_name
@@ -216,7 +247,7 @@ class CitoyenSerializer(serializers.ModelSerializer):
                 rep['address'] = instance.address
                 rep['dateOfBirth'] = instance.dateOfBirth
                 rep['isValid'] = instance.isValid
-                rep['cin'] = instance.cin.url if instance.cin and hasattr(instance.cin, 'url')  else None               
+                rep['cin'] = instance.cin.url if instance.cin and hasattr(instance.cin, 'url') else None               
                 rep['name'] = f"{instance.user.first_name} {instance.user.last_name}"
                 # Remove the nested user key as it's replaced by explicit fields
                 rep.pop('user')

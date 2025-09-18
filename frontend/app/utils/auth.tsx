@@ -212,3 +212,29 @@ export const getAgentList = async () => {
     }
     
 }
+
+export const getCitoyenList = async () => {
+    try {
+        const response = await axios.get(`${API_URL}listCitoyen/`, {
+            withCredentials: true
+        })
+        return response.data;
+    }
+    catch (e) {
+        console.error("Error fetching Citoyens:", e);
+        throw new Error("Getting citoyens failed!");
+    }
+}
+
+export const validateCitoyen = async (citoyenId: number) => {
+    try {
+        const response = await axios.post(`http://localhost:8000/api/auth/validateCitoyen/${citoyenId}/`, {}, {
+            withCredentials: true
+        })
+        return response.data;
+    }
+    catch (e) {
+        console.error("Error validating citoyen:", e);
+        throw new Error("Validating citoyen failed!");
+    }
+}

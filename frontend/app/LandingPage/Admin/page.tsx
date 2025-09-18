@@ -13,14 +13,31 @@ import InfoBar from '@/components/MainPageCom/Section1/InfoBar';
 import Link from 'next/link';
 import { FaHome, FaUser, FaCog, FaBars } from "react-icons/fa";
 import RecList from '@/components/Reclamtion/ReclamationList';
-
+import AdminReclamationList from '@/components/Reclamtion/AdminReclamationList';
+import Agents from '@/components/Admindashboard/Agents';
+import Citoyens from '@/components/Admindashboard/Citoyens';
+import { registerServiceProvider } from '@/app/utils/auth';
 const page = () => {
   const [user, setUser] = useState<any>(null);
   const [existing, setExisting] = useState(false)
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
-  const [activeView, setActiveView] = useState('citoyens');
+  const [activeView, setActiveView] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('adminActiveView') || 'citoyens';
+    }
+    return 'citoyens';
+  });
+  const [role, setRole] = useState("citoyen");
+  const [email, setEmail] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [password, setPassword] = useState("");
+  const [telephone, setTelephone] = useState("");
+  const [serviceCategory, setServiceCategory] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
+  
   useEffect(() => {
     checkAuthStatus();
   }, []);
@@ -34,6 +51,42 @@ const page = () => {
       }
     } catch (error) {
       // User not authenticated, show landing page normally
+    }
+  };
+const handleServiceProviderSubmit = async () => {
+    const userData = {
+      firstName,
+      lastName,
+      email,
+      password,
+      telephone,
+      role,
+      serviceCategory,
+    };
+
+    try {
+      await registerServiceProvider(
+        userData.firstName,
+        userData.lastName,
+        userData.email,
+        userData.password,
+        userData.telephone,
+        userData.role,
+        userData.serviceCategory
+      );
+      alert("Service Provider registration works successfully!");
+    } catch (e) {
+      alert(
+        "Failed to register service provider with info: \n" +
+          userData.firstName + ", " +
+          userData.lastName + ", " +
+          userData.email + ", " +
+          userData.password + ", " +
+          userData.telephone + ", " +
+          userData.role + ", " +
+          userData.serviceCategory
+      );
+      console.error(e);
     }
   };
 
@@ -90,14 +143,17 @@ const page = () => {
             className="p-4 focus:outline-none hover:bg-[#3c92c1] w-full flex items-center"
           >
             <FaBars className="w-5 h-5" />
-            {!collapsed && <span className="ml-2">Collapse</span>}
+            {!collapsed && <span className="ml-2"></span>}
           </button>
 
           {/* Navigation items */}
           <nav className="mt-4">
             <ul>
               <li 
-                onClick={() => setActiveView('citoyens')}
+                onClick={() => {
+                  setActiveView('citoyens');
+                  localStorage.setItem('adminActiveView', 'citoyens');
+                }}
                 className={`flex items-center p-4 hover:bg-[#3c92c1] cursor-pointer ${
                   activeView === 'citoyens' ? 'bg-[#3c92c1]' : ''
                 }`}
@@ -106,7 +162,10 @@ const page = () => {
                 {!collapsed && <span className="ml-3">List Citoyens</span>}
               </li>
               <li 
-                onClick={() => setActiveView('agents')}
+                onClick={() => {
+                  setActiveView('agents');
+                  localStorage.setItem('adminActiveView', 'agents');
+                }}
                 className={`flex items-center p-4 hover:bg-[#3c92c1] cursor-pointer ${
                   activeView === 'agents' ? 'bg-[#3c92c1]' : ''
                 }`}
@@ -115,7 +174,10 @@ const page = () => {
                 {!collapsed && <span className="ml-3">List Agents</span>}
               </li>
               <li 
-                onClick={() => setActiveView('reclamations')}
+                onClick={() => {
+                  setActiveView('reclamations');
+                  localStorage.setItem('adminActiveView', 'reclamations');
+                }}
                 className={`flex items-center p-4 hover:bg-[#3c92c1] cursor-pointer ${
                   activeView === 'reclamations' ? 'bg-[#3c92c1]' : ''
                 }`}
@@ -132,20 +194,26 @@ const page = () => {
           <div className="flex flex-col gap-15 items-center w-full bg-blue1 min-h-full p-4"
                style={{ backgroundImage: "url('/images/wordswhite.png')" }}>
             {activeView === 'citoyens' && (
-              <div className="w-full text-center">
-                <h2 className="text-3xl font-bold text-white">Liste des Citoyens</h2>
+              <div className="w-full">
+                <h2 className="text-2xl font-bold text-white mb-4">Liste des Citoyens</h2>
+                <div className="bg-white rounded-lg p-4">
+                  <Citoyens/>
+                </div>
               </div>
             )}
             
             {activeView === 'agents' && (
-              <div className="w-full text-center">
-                <h2 className="text-3xl font-bold text-white">Liste des Agents</h2>
+              <div className="w-full">
+                <h2 className="text-2xl font-bold text-white mb-4">Liste des Agents</h2>
+                <div className="bg-white rounded-lg p-4">
+                  <Agents/>
+                </div>
               </div>
             )}
             
             {activeView === 'reclamations' && (
               <div className="w-full">
-                <RecList/>
+                <AdminReclamationList/>
               </div>
             )}
           </div>

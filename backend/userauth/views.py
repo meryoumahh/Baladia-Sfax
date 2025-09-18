@@ -13,6 +13,7 @@ from .models import CustomUser, CitoyenProfile, AgentProfile
 import json
 from rest_framework import generics, permissions
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
+from rest_framework.decorators import api_view, permission_classes
 
 # Create your views here.
 class UserInfoView(RetrieveUpdateAPIView):
@@ -341,3 +342,17 @@ class CitoyenListView(generics.ListAPIView):
     queryset = CitoyenProfile.objects.all()
     serializer_class = CitoyenSerializer
     permission_classes = [permissions.IsAdminUser]
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def validate_citoyen(request, pk):
+    if not request.user.is_superuser:
+        return Response({'error': 'Only admin can validate citoyens'}, status=403)
+    
+    try:
+        citoyen = CitoyenProfile.objects.get(pk=pk)
+        citoyen.isValid = True
+        citoyen.save()
+        return Response({'message': 'Citoyen validated successfully'})
+    except CitoyenProfile.DoesNotExist:
+        return Response({'error': 'Citoyen not found'}, status=404)

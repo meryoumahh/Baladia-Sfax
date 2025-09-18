@@ -7,7 +7,8 @@ from .views import (
     ReclamationListAgentView,
     ReclamationDeleteView,
     ReclamationUpdateView,
-    get_user_stats
+    get_user_stats,
+    validate_reclamation
 )
 
 urlpatterns = [
@@ -21,6 +22,7 @@ urlpatterns = [
     path('update/<int:pk>/', ReclamationUpdateView.as_view(), name='reclamation-update'),
     path('delete/<int:pk>/', ReclamationDeleteView.as_view(), name='reclamation-delete'),
     path('stats/', get_user_stats, name='user-stats'),
+    path('validate/<int:pk>/', validate_reclamation, name='validate-reclamation'),
     #path('agent-status/<int:pk>/', ReclamationAgentStatusUpdateView.as_view(), name='reclamation-agent-status-update'),
 
 #path('<int:pk>/update/', ReclamationUpdateView.as_view(), name='reclamation-update'),
