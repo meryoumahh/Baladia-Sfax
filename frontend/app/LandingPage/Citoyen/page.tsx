@@ -13,9 +13,11 @@ import { FaPen } from "react-icons/fa";
 import { FaPlus } from 'react-icons/fa';
 import InfoBar from '@/components/MainPageCom/Section1/InfoBar';
 import Link from 'next/link';
+import FormReclamation from '@/components/Reclamtion/FormReclamation';
 const page = () => {
   const [user, setUser] = useState<any>(null);
   const [existing, setExisting] = useState(false)
+  const [showForm, setShowForm] = useState(false)
   const router = useRouter();
 
   useEffect(() => {
@@ -68,10 +70,16 @@ const page = () => {
                       Accueil
                     </button>
                   <button 
-                   
-                    className="ml-4 text-amber-50 px-3 py-1 rounded-xl  hover:bg-[#58A0C8] active:bg-[#3c92c1] transition "
+                    onClick={() => setShowForm(false)}
+                    className={`ml-4 px-3 py-1 rounded-xl transition ${!showForm ? 'bg-[#3c92c1] text-amber-50' : 'text-amber-50 hover:bg-[#58A0C8] active:bg-[#3c92c1]'}`}
                   >
                     Mon tableau de bord
+                  </button>
+                  <button 
+                    onClick={() => setShowForm(true)}
+                    className={`px-3 py-1 rounded-xl transition ${showForm ? 'bg-[#3c92c1] text-amber-50' : 'text-amber-50 hover:bg-[#58A0C8] active:bg-[#3c92c1]'}`}
+                  >
+                    Ajouter Reclamation
                   </button>
                   <button
                       onClick={() => window.location.href = '/'}
@@ -88,6 +96,7 @@ const page = () => {
                   </div>
                 </div>
               )}
+              {!showForm && (
               <div className='flex flex-col w-9/10 justify-center items-center align-middle bg-amber-50 rounded-xl p-5 '>
                 <div className='flex justify-between p-20'>
                   <div className='flex flex-col g-10 text-start px-30'>
@@ -95,7 +104,7 @@ const page = () => {
                   <h2 className='text-xl font-medium text-[#113f67]'>Suivez vos réclamations et signalements d’infrastructures.</h2>
                   </div> 
                   <button 
-                   onClick={() => router.push('/Dashboard/citoyen/')}
+                   onClick={() => setShowForm(true)}
                   className='flex justify-center items-center gap-2 text-amber-50 bg-[#113f67] rounded-xl px-5 mx-25 h-10 shadow-xl active:bg-[#3c92c1] transition'>
                     <FaPlus size={15}/> Ajouter Reclamation
                   </button>
@@ -114,13 +123,18 @@ const page = () => {
                   <span className='text-2xl font-medium text-red-500'>2</span></div>
                 </div>
               </div>
+              )}
 
 
 
 
-              <div className='flex flex-col bg-amber-50 shadow-2xl w-9/10 p-10 rounded-xl'>
-              <RecList/>
-              </div>
+              {showForm ? (
+                <FormReclamation onBack={() => setShowForm(false)} />
+              ) : (
+                <div className='flex flex-col bg-amber-50 shadow-2xl w-9/10 p-10 rounded-xl'>
+                  <RecList/>
+                </div>
+              )}
           </div>
     </>
   )

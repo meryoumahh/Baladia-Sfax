@@ -21,7 +21,11 @@ const CATEGORIES = [
   'eclairage public',
 ];
 
-export default function FormReclamation() {
+interface FormReclamationProps {
+  onBack?: () => void;
+}
+
+export default function FormReclamation({ onBack }: FormReclamationProps) {
   const [form, setForm] = useState<ComplaintFormData>({
     title: "",
     category: "",
@@ -81,6 +85,7 @@ export default function FormReclamation() {
         description: "",
         photo: null,
       });
+      onBack?.();
     } catch (err) {
       setError((err as Error).message || "Error submitting complaint.");
     } finally {
@@ -90,7 +95,12 @@ export default function FormReclamation() {
 
   return (
     <div className="w-1/3 mx-auto p-6 bg-white rounded-xl shadow my-4">
-      <button onClick={() => window.history.back()} className="mb-4 text-gray-500">&#8592; Back</button>
+      <button 
+        onClick={onBack || (() => window.history.back())} 
+        className="mb-4 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors duration-200 flex items-center gap-2"
+      >
+        &#8592; Retour au tableau de bord
+      </button>
       <h1 className="text-3xl font-bold mb-2">Ajouter Nouvelle Reclamation</h1>
       <p className="text-gray-600 mb-4">Votre Voix, Notre Action!</p>
 
@@ -182,15 +192,16 @@ export default function FormReclamation() {
           <button
             type="button"
             className="w-1/2 py-2 border rounded text-gray-700"
-            onClick={() =>
+            onClick={() => {
               setForm({
                 title: "",
                 category: "",
                 location: "",
                 description: "",
                 photo: null,
-              })
-            }
+              });
+              onBack?.();
+            }}
             disabled={submitting}
           >
             Retour
