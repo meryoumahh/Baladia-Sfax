@@ -16,9 +16,9 @@ class Reclamation(models.Model):
     ]
 
     STATUS_CHOICES = [
-        ('pending', 'En attente'),
-        ('in_progress', 'En cours'),
-        ('resolved', 'Résolu'),
+        ('En attente', 'En attente'),
+        ('En cours', 'En cours'),
+        ('Résolu', 'Résolu'),
     ]
 
     citoyen = models.ForeignKey(
@@ -36,7 +36,7 @@ class Reclamation(models.Model):
     titre = models.CharField(max_length=255)
     description = models.TextField()
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='En attente')
     date_soumission = models.DateTimeField(auto_now_add=True)
     date_misajour = models.DateTimeField(auto_now=True)
     localization = models.CharField(max_length=255)

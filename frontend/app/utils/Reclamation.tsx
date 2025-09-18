@@ -16,3 +16,42 @@ export const getReclamationList = async () => {
     }
     
 }
+
+export const CreateReclamation = async (
+    title: string,
+    categorie: string,
+    location: string,
+    description: string,
+    image: File | null,
+    
+) => {  
+    try {
+        const formData = new FormData();
+        formData.append('titre', title);
+        formData.append('category', categorie);
+        formData.append('localization', location);
+        formData.append('description', description);
+        if (image) {
+            formData.append('picture', image);
+        }
+        
+        const response = await axios.post(`${API_URL}create/`, formData, {
+            withCredentials: true,
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+        alert("reclamation SENT successfully!");
+        return response.data;
+    }
+    catch (e) {
+    if (axios.isAxiosError(e)) {
+        console.error('Axios error response:', e.response?.data);
+        alert('Registration error: ' + JSON.stringify(e.response?.data));
+    }
+    else {
+        console.error(e);
+    }
+    throw new Error("reclamation failed");
+    }
+}

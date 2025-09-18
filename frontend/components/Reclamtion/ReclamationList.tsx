@@ -9,6 +9,7 @@ interface Reclamation {
   category: string;
   status: string;
   localization: string;
+  date_soumission : string;
   picture: string;
 }
 
@@ -40,7 +41,7 @@ const RecList = () => {
   return (
     <div className="flex flex-wrap justify-start gap-4">
         
-      
+      <h1 className="text-3xl font-meduim ">Vos reclamations</h1>
       {rec.map((re) => (
         <ReclamationCard
           key={re.id}
@@ -49,9 +50,8 @@ const RecList = () => {
           category={re.category}
           status={re.status}
           localization={re.localization}
+          date={re.date_soumission}
           picture={re.picture}
-          
-          
         />
       ))}
     </div>

@@ -1,10 +1,14 @@
 import { useState } from "react";
+import { FaExclamationTriangle } from 'react-icons/fa';
+import { FaStopwatch } from 'react-icons/fa'; 
+import { FaCheck } from 'react-icons/fa';
 interface ReclamationCardProps {
   titre: string;
   description: string;
   category: string;
   status: string;
   localization: string;
+  date: string;
   picture: string;
 }
 
@@ -14,6 +18,7 @@ export default function ReclamationCard({
   category,
   status,
   localization,
+  date,
   picture,
 }: ReclamationCardProps) {
   const [showPopup, setShowPopup] = useState(false);
@@ -21,31 +26,39 @@ export default function ReclamationCard({
   return (
     <>
       {/* Card container */}
-      <div className="flex justify-between bg-white shadow-md rounded-xl overflow-hidden w-full mx-auto mb-6 hover:shadow-lg transition-shadow duration-300 p-4">
+      <div className="flex justify-between bg-amber-50 shadow-md rounded-xl overflow-hidden w-full mx-auto mb-6 hover:shadow-lg transition-shadow duration-300 p-4">
         {/* Left column: text info */}
         <div className="flex flex-col justify-center text-start space-y-2 px-3">
           <h2 className="text-2xl font-bold">{titre}</h2>
-          <span className="text-gray-500 font-medium">{category}</span>
-          <p className="text-gray-600">{description}</p>
-          <span className="text-gray-500">Location: {localization}</span>
-          {/*<span className="text-gray-400 text-sm">Date uploaded: {date}</span>*/}
+          
+          <p className="text-gray-600 font-medium">{description}</p>
+          <div className="flex gap-5">
+          <span className="text-gray-500 font-light"> categorie :{category}</span>
+          <span className="text-gray-500 font-light">Location: {localization}</span>
+          <span className="text-gray-500 font-light">Date Soumission: {new Date(date).toLocaleDateString('fr-FR')}</span></div>
         </div>
 
         {/* Right column: status + button */}
         <div className="flex flex-col justify-between items-end">
-          <span className={`px-3 py-1 rounded-lg font-semibold text-white ${
-            status === "in_progress"
+          <span
+          className={`px-3 py-1 rounded-full font-semibold text-white ${
+            status === "En cours"
               ? "bg-yellow-400"
-              : status === "pending"
+              : status === "En attente"
               ? "bg-gray-400"
               : "bg-green-500"
-          } capitalize`}>
-            {status.replace("_", " ")}
-          </span>
+          } capitalize flex items-center gap-2`}
+        >
+          {status === "En cours" && <FaExclamationTriangle />}
+          {status === "En attente" && <FaStopwatch />}
+          {status === "Résolu" && <FaCheck />}
+          
+          {status.replace("_", " ")}
+        </span>
 
           <button
             onClick={() => setShowPopup(true)}
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+            className="mt-4 px-4 py-2 bg-[#113f67] text-white rounded-lg hover:bg-blue-500 transition"
           >
             Voir Photo
           </button>
@@ -54,8 +67,8 @@ export default function ReclamationCard({
 
       {/* Popup for the picture */}
       {showPopup && (
-      <div className="fixed inset-0 bg-transparent bg-opacity-30 backdrop-blur-sm flex justify-center items-center z-50">
-        <div className="bg-white rounded-lg p-4 relative max-w-lg w-full">
+      <div className="fixed inset-0 bg-transparent bg-opacity-30 backdrop-blur-sm flex justify-center items-center z-50 w-full">
+        <div className="bg-white rounded-lg p-4 relative max-w-1/2 w-full">
           <button
             onClick={() => setShowPopup(false)}
             className="absolute top-2 right-2 text-gray-600 hover:text-gray-800 font-bold text-2xl"
