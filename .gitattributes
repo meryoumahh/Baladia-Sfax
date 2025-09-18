@@ -1,4 +1,4 @@
 * text=auto
+*.py text eol=lf
 *.ts text eol=lf
 *.tsx text eol=lf
-*.py text eol=lf

@@ -238,3 +238,16 @@ export const validateCitoyen = async (citoyenId: number) => {
         throw new Error("Validating citoyen failed!");
     }
 }
+
+export const updateUserProfile = async (userData: { first_name: string, last_name: string, telephone: string }) => {
+    try {
+        const response = await axios.patch(`${API_URL}user-info/`, userData, {
+            withCredentials: true
+        })
+        return response.data;
+    }
+    catch (e) {
+        console.error("Error updating profile:", e);
+        throw new Error("Profile update failed!");
+    }
+}

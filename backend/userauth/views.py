@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView
-from .serializers import CustomUserSerializer, AgentCreationSerializer, LoginSerializer, CitoyenSignupSerializer, AgentSerializer, CitoyenSerializer
+from .serializers import CustomUserSerializer, AgentCreationSerializer, LoginSerializer, CitoyenSignupSerializer, AgentSerializer, CitoyenSerializer, UserInfoSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -18,9 +18,25 @@ from rest_framework.decorators import api_view, permission_classes
 # Create your views here.
 class UserInfoView(RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = CustomUserSerializer
+    serializer_class = UserInfoSerializer
     def get_object(self):
         return self.request.user
+    
+    def patch(self, request, *args, **kwargs):
+        user = self.get_object()
+        data = request.data
+        
+        # Update allowed fields
+        if 'first_name' in data:
+            user.first_name = data['first_name']
+        if 'last_name' in data:
+            user.last_name = data['last_name']
+        if 'telephone' in data:
+            user.telephone = data['telephone']
+        
+        user.save()
+        serializer = self.get_serializer(user)
+        return Response(serializer.data)
     
 class UserSignupView(CreateAPIView):
     def post(self, request):

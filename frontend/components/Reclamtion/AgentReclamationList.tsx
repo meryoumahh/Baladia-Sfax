@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { getReclamationList, validateReclamation } from '@/app/utils/Reclamation';
-import { getAgentList } from '@/app/utils/auth';
 import axios from 'axios';
 
 interface Reclamation {
@@ -9,49 +7,27 @@ interface Reclamation {
   description: string;
   category: string;
   status: string;
-  validate: boolean;
   date_soumission: string;
   localization: string;
   picture: string;
-  agent?: {
-    id: number;
-    name: string;
-  } | null;
 }
 
-interface Agent {
-  id: number;
-  name: string;
-  email: string;
-}
-
-const AdminReclamationList = () => {
+const AgentReclamationList = () => {
   const [reclamations, setReclamations] = useState<Reclamation[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedReclamation, setSelectedReclamation] = useState<Reclamation | null>(null);
-  const [agents, setAgents] = useState<Agent[]>([]);
-  const [showAgentDropdown, setShowAgentDropdown] = useState<number | null>(null);
 
   useEffect(() => {
     fetchReclamations();
-    fetchAgents();
   }, []);
-
-  const fetchAgents = async () => {
-    try {
-      const data = await getAgentList();
-      setAgents(data);
-    } catch (error) {
-      console.error('Error fetching agents:', error);
-    }
-  };
 
   const fetchReclamations = async () => {
     try {
-      const data = await getReclamationList();
-      console.log('Reclamations data:', data);
-      setReclamations(data);
+      const response = await axios.get('http://localhost:8000/api/reclamation/agent-reclamation-list/', {
+        withCredentials: true
+      });
+      setReclamations(response.data);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching reclamations:', error);
@@ -59,26 +35,15 @@ const AdminReclamationList = () => {
     }
   };
 
-  const handleValidate = async (id: number) => {
+  const updateStatus = async (reclamationId: number, newStatus: string) => {
     try {
-      await validateReclamation(id);
-      // Refresh the list after validation
-      fetchReclamations();
-    } catch (error) {
-      console.error('Error validating reclamation:', error);
-    }
-  };
-
-  const handleAssignAgent = async (reclamationId: number, agentId: number) => {
-    try {
-      await axios.patch(`http://localhost:8000/api/reclamation/assignAgent/${reclamationId}/`, 
-        { agent: agentId }, 
+      await axios.patch(`http://localhost:8000/api/reclamation/status/${reclamationId}/`, 
+        { status: newStatus }, 
         { withCredentials: true }
       );
-      setShowAgentDropdown(null);
-      fetchReclamations(); // Refresh the list
+      fetchReclamations();
     } catch (error) {
-      console.error('Error assigning agent:', error);
+      console.error('Error updating status:', error);
     }
   };
 
@@ -88,10 +53,10 @@ const AdminReclamationList = () => {
 
   return (
     <div className="w-full">
-      <h2 className="text-2xl font-bold text-white mb-4">Liste des Réclamations (Admin)</h2>
+      <h2 className="text-2xl font-bold text-white mb-4">Mes Réclamations Assignées</h2>
       <div className="bg-white rounded-lg p-4">
         {reclamations.length === 0 ? (
-          <p>Aucune réclamation trouvée.</p>
+          <p>Aucune réclamation assignée.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full border-collapse border border-gray-300">
@@ -103,9 +68,8 @@ const AdminReclamationList = () => {
                   <th className="border border-gray-300 p-2">Localisation</th>
                   <th className="border border-gray-300 p-2">Date</th>
                   <th className="border border-gray-300 p-2">Image</th>
-                  <th className="border border-gray-300 p-2">Agent Assigné</th>
                   <th className="border border-gray-300 p-2">Détails</th>
-                  <th className="border border-gray-300 p-2">Validation</th>
+                  <th className="border border-gray-300 p-2">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -133,7 +97,6 @@ const AdminReclamationList = () => {
                             const imageUrl = reclamation.picture.startsWith('http') 
                               ? reclamation.picture 
                               : `http://localhost:8000${reclamation.picture.startsWith('/') ? '' : '/'}${reclamation.picture}`;
-                            console.log('Image URL:', imageUrl);
                             setSelectedImage(imageUrl);
                           }}
                           className="bg-gray-500 text-white px-2 py-1 rounded hover:bg-gray-600 transition text-sm"
@@ -144,42 +107,6 @@ const AdminReclamationList = () => {
                         <span className="text-gray-400">Aucune</span>
                       )}
                     </td>
-                    <td className="border border-gray-300 p-2 relative">
-                      <div>
-                        {reclamation.agent && (
-                          <div className="mb-2">
-                            <span className="text-sm font-medium text-gray-700">Assigné à:</span>
-                            <p className="text-sm text-blue-600">{reclamation.agent.name}</p>
-                          </div>
-                        )}
-                        <button
-                          onClick={() => setShowAgentDropdown(showAgentDropdown === reclamation.id ? null : reclamation.id)}
-                          className={`px-2 py-1 rounded transition text-sm ${
-                            reclamation.agent 
-                              ? 'bg-blue-500 hover:bg-blue-600 text-white' 
-                              : 'bg-orange-500 hover:bg-orange-600 text-white'
-                          }`}
-                        >
-                          {reclamation.agent ? 'Réassigner' : 'Assigner'}
-                        </button>
-                        {showAgentDropdown === reclamation.id && (
-                          <div className="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded shadow-lg z-10 min-w-48">
-                            {agents.map((agent) => (
-                              <button
-                                key={agent.id}
-                                onClick={() => handleAssignAgent(reclamation.id, agent.id)}
-                                className={`block w-full text-left px-3 py-2 hover:bg-gray-100 text-sm ${
-                                  reclamation.agent?.id === agent.id ? 'bg-blue-50 text-blue-700 font-medium' : ''
-                                }`}
-                              >
-                                {agent.name}
-                                {reclamation.agent?.id === agent.id && ' (Actuel)'}
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </td>
                     <td className="border border-gray-300 p-2">
                       <button
                         onClick={() => setSelectedReclamation(reclamation)}
@@ -189,18 +116,22 @@ const AdminReclamationList = () => {
                       </button>
                     </td>
                     <td className="border border-gray-300 p-2">
-                      {reclamation.validate ? (
-                        <button className="bg-green-500 text-white px-3 py-1 rounded cursor-default">
-                          Validé
-                        </button>
-                      ) : (
+                      <div className="flex flex-col gap-1">
                         <button
-                          onClick={() => handleValidate(reclamation.id)}
-                          className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition"
+                          onClick={() => updateStatus(reclamation.id, 'En cours')}
+                          className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 transition text-xs"
+                          disabled={reclamation.status === 'En cours'}
                         >
-                          Valider
+                          En cours
                         </button>
-                      )}
+                        <button
+                          onClick={() => updateStatus(reclamation.id, 'Résolu')}
+                          className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 transition text-xs"
+                          disabled={reclamation.status === 'Résolu'}
+                        >
+                          Résolu
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -266,11 +197,6 @@ const AdminReclamationList = () => {
               </div>
               
               <div>
-                <strong>Dernière mise à jour:</strong>
-                <span className="ml-2">{new Date(selectedReclamation.date_misajour).toLocaleString()}</span>
-              </div>
-              
-              <div>
                 <strong>Status:</strong>
                 <span className={`ml-2 px-2 py-1 rounded text-sm ${
                   selectedReclamation.status === 'Résolu' ? 'bg-green-100 text-green-800' :
@@ -295,4 +221,4 @@ const AdminReclamationList = () => {
   );
 };
 
-export default AdminReclamationList;
+export default AgentReclamationList;

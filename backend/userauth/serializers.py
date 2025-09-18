@@ -252,3 +252,21 @@ class CitoyenSerializer(serializers.ModelSerializer):
                 # Remove the nested user key as it's replaced by explicit fields
                 rep.pop('user')
                 return rep
+
+class UserInfoSerializer(serializers.ModelSerializer):
+    citoyen_profile = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = CustomUser
+        fields = ['first_name', 'last_name', 'email', 'telephone', 'role', 'is_staff', 'citoyen_profile']
+    
+    def get_citoyen_profile(self, obj):
+        try:
+            profile = obj.citoyen_profile
+            return {
+                'isValid': profile.isValid,
+                'address': profile.address,
+                'dateOfBirth': profile.dateOfBirth
+            }
+        except:
+            return None
