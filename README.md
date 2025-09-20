@@ -144,12 +144,15 @@ frontend/
 ### Prérequis
 - Python 3.8+
 - Node.js 18+
-- SQLite (inclus avec Django)
+- **PostgreSQL 12+** (remplace SQLite)
+- psycopg2-binary (driver PostgreSQL)
 
 ### Backend Setup
 ```bash
 cd backend
 pip install -r requirements.txt
+
+# Configuration PostgreSQL requise avant migration
 python manage.py makemigrations
 python manage.py migrate
 python manage.py createsuperuser
@@ -176,7 +179,8 @@ npm run dev
 - `CORS_ALLOWED_ORIGINS` - Origins autorisées
 
 ### Base de données
-- SQLite pour le développement
+- **PostgreSQL** pour le développement et production
+- **SQLite** (ancienne configuration, migrée vers PostgreSQL)
 - Migrations automatiques pour les modèles
 - Données de test via l'admin Django
 
@@ -221,6 +225,212 @@ npm run dev
 - Validation des permissions par rôle
 - Protection CSRF
 - Upload sécurisé des fichiers
+
+## 🗄️ Configuration Base de Données PostgreSQL
+
+### **Migration SQLite vers PostgreSQL**
+
+#### **Étape 1: Installation PostgreSQL**
+```bash
+# Windows - Télécharger depuis https://www.postgresql.org/download/windows/
+# Installer avec les paramètres par défaut
+# Noter le mot de passe du superutilisateur postgres
+```
+
+#### **Étape 2: Installation du Driver Python**
+```bash
+cd backend
+pip install psycopg2-binary
+pip install python-decouple  # Pour les variables d'environnement
+```
+
+#### **Étape 3: Création de la Base de Données**
+```sql
+-- Se connecter à PostgreSQL
+psql -U postgres
+
+-- Créer la base de données
+CREATE DATABASE "BaladiaSfax";
+
+-- Créer un utilisateur dédié (optionnel)
+CREATE USER baladia_user WITH PASSWORD 'votre_mot_de_passe';
+GRANT ALL PRIVILEGES ON DATABASE "BaladiaSfax" TO baladia_user;
+
+-- Quitter
+\q
+```
+
+#### **Étape 4: Configuration Django**
+
+**Variables d'Environnement (.env dans backend/)**:
+```bash
+DB_NAME=BaladiaSfax
+DB_USER=postgres
+DB_PASSWORD=votre_mot_de_passe
+DB_HOST=localhost
+DB_PORT=5432
+```
+
+**Configuration settings.py**:
+```python
+from decouple import config
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST'),
+        'PORT': config('DB_PORT'),
+    }
+}
+```
+
+#### **Étape 5: Migration des Données**
+```bash
+# Option A: Migration propre (recommandée)
+python manage.py migrate
+python manage.py createsuperuser
+
+# Option B: Transfert depuis SQLite (si données existantes)
+python manage.py dumpdata --natural-foreign --natural-primary -e contenttypes -e auth.Permission > backup.json
+# Changer la configuration vers PostgreSQL
+python manage.py migrate
+python manage.py loaddata backup.json
+```
+
+### **Avantages PostgreSQL vs SQLite**
+
+| Aspect | SQLite | PostgreSQL |
+|--------|--------|------------|
+| **Performance** | Limitée pour concurrent | Excellente pour concurrent |
+| **Scalabilité** | Fichier unique | Millions d'enregistrements |
+| **Fonctionnalités** | Basiques | Avancées (JSON, Arrays, Full-text) |
+| **Production** | Non recommandé | Prêt pour production |
+| **Backup** | Copie de fichier | Outils professionnels |
+| **Sécurité** | Limitée | Robuste avec SSL |
+
+### **Commandes PostgreSQL Utiles**
+```bash
+# Connexion à la base
+psql -U postgres -d BaladiaSfax
+
+# Commandes psql
+\l          # Lister les bases de données
+\dt         # Lister les tables
+\d table    # Décrire une table
+\q          # Quitter
+
+# Backup/Restore
+pg_dump -U postgres BaladiaSfax > backup.sql
+psql -U postgres BaladiaSfax < backup.sql
+```
+
+## 📊 Détails des Migrations Django
+
+### **Structure des Migrations (37 migrations totales)**
+
+#### **Applications Django Standard (31 migrations)**
+
+**admin (3 migrations)**:
+- `0001_initial` - Tables d'administration Django
+- `0002_logentry_remove_auto_add` - Amélioration des logs
+- `0003_logentry_add_action_flag_choices` - Choix d'actions
+
+**auth (12 migrations)**:
+- `0001_initial` - Système d'authentification de base
+- `0002_alter_permission_name_max_length` - Longueur des permissions
+- `0003_alter_user_email_max_length` - Longueur email utilisateur
+- `0004_alter_user_username_opts` - Options nom d'utilisateur
+- `0005_alter_user_last_login_null` - Dernière connexion nullable
+- `0006_require_contenttypes_0002` - Dépendance contenttypes
+- `0007_alter_validators_add_error_messages` - Messages d'erreur
+- `0008_alter_user_username_max_length` - Longueur nom d'utilisateur
+- `0009_alter_user_last_name_max_length` - Longueur nom de famille
+- `0010_alter_group_name_max_length` - Longueur nom de groupe
+- `0011_update_proxy_permissions` - Permissions proxy
+- `0012_alter_user_first_name_max_length` - Longueur prénom
+
+**contenttypes (2 migrations)**:
+- `0001_initial` - Types de contenu Django
+- `0002_remove_content_type_name` - Suppression nom type contenu
+
+**sessions (1 migration)**:
+- `0001_initial` - Gestion des sessions utilisateur
+
+**token_blacklist (13 migrations)**:
+- `0001_initial` - Système de blacklist JWT initial
+- `0002_outstandingtoken_jti_hex` - Token JTI hexadécimal
+- `0003_auto_20171017_2007` à `0013_alter_blacklistedtoken_options_and_more` - Évolutions JWT
+
+#### **Applications Personnalisées Baladia (6 migrations)**
+
+**userauth (6 migrations)**:
+- `0001_initial` - **Modèle CustomUser initial**
+  - Création du système d'authentification personnalisé
+  - Rôles: Citoyen, Agent, Admin
+  - Champs: first_name, last_name, email, role
+
+- `0002_customuser_telephone` - **Ajout du téléphone**
+  - Ajout du champ telephone au modèle CustomUser
+  - Permet la communication directe avec les utilisateurs
+
+- `0003_remove_citoyenprofile_telephone_and_more` - **Refactoring des profils**
+  - Suppression du téléphone du CitoyenProfile
+  - Centralisation dans CustomUser
+  - Création des modèles CitoyenProfile et AgentProfile
+
+- `0004_alter_customuser_role` - **Amélioration des rôles**
+  - Modification des choix de rôles utilisateur
+  - Standardisation des permissions
+
+- `0005_alter_agentprofile_servicecategory` - **Catégories de service**
+  - Définition des 12 catégories de services municipaux
+  - Spécialisation des agents par domaine
+
+- `0006_agentprofile_plain_password` - **Mots de passe agents**
+  - Ajout du stockage temporaire des mots de passe
+  - ⚠️ **Problème de sécurité identifié**
+
+**reclamation (2 migrations)**:
+- `0001_initial` - **Système de réclamations**
+  - Création du modèle Reclamation
+  - Champs: titre, description, category, status, localization
+  - Relation avec CustomUser (créateur)
+
+- `0002_reclamation_validate_alter_reclamation_category_and_more` - **Validation et améliorations**
+  - Ajout du champ validate (validation admin)
+  - Amélioration des catégories de réclamations
+  - Ajout de l'assignment aux agents
+  - Support des images (picture)
+
+### **Tables Créées (≈15 tables)**
+
+#### **Tables Système Django (≈11 tables)**:
+- `django_migrations` - Historique des migrations
+- `django_admin_log` - Logs d'administration
+- `django_content_type` - Types de contenu
+- `django_session` - Sessions utilisateur
+- `auth_user`, `auth_group`, `auth_permission` - Authentification
+- `auth_group_permissions`, `auth_user_groups`, `auth_user_user_permissions` - Relations
+- `token_blacklist_outstandingtoken`, `token_blacklist_blacklistedtoken` - JWT
+
+#### **Tables Métier Baladia (4 tables)**:
+- **`userauth_customuser`** - Utilisateurs (Citoyen/Agent/Admin)
+- **`userauth_citoyenprofile`** - Profils citoyens avec CIN et validation
+- **`userauth_agentprofile`** - Profils agents avec catégories et mots de passe
+- **`reclamation_reclamation`** - Réclamations municipales avec statuts
+
+### **Évolution du Projet (Chronologie)**
+
+1. **Phase 1** - Architecture de base (0001_initial)
+2. **Phase 2** - Communication utilisateur (ajout téléphone)
+3. **Phase 3** - Séparation des responsabilités (profils séparés)
+4. **Phase 4** - Amélioration de la sécurité (rôles)
+5. **Phase 5** - Spécialisation métier (catégories agents)
+6. **Phase 6** - Gestion des mots de passe (problème de sécurité)
+7. **Phase 7** - Validation et assignment (réclamations complètes)
 
 ## 🎯 Objectifs du Projet
 
