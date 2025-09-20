@@ -20,7 +20,7 @@ const SectionOne = ({ user, redirectToDashboard }: SectionOneProps) => {
   style={{ backgroundImage: "url('/images/wordsWhite.png')" }}
 >
   
-  <NavBar user={user} />
+  <NavBar user={user} redirectToDashboard={redirectToDashboard} />
   <div className="flex justify-center items-center  mt-auto sm:mt-auto ">
     <div className='bg-amber-50 w-5xl  rounded-t-4xl pt-20 px-20 flex flex-col justify-center gap-4 sm:gap-8 mt-5 sm:mt-10 mx-20'>
         <div className='flex flex-col  sm:flex-row justify-items-start pb-4 sm:pb-5' >
@@ -46,9 +46,19 @@ const SectionOne = ({ user, redirectToDashboard }: SectionOneProps) => {
                 Se Connecter
               </SpecialButtons>
             )}
-            <SpecialButtons variant="sec" href="/register">
+            {user ? (
+              <SpecialButtons 
+                variant="sec" 
+                href="#" 
+                onClick={() => redirectToDashboard && redirectToDashboard(user)}
+              >
                 Reclamer
-            </SpecialButtons>
+              </SpecialButtons>
+            ) : (
+              <SpecialButtons variant="sec" href="/auth/signin">
+                Reclamer
+              </SpecialButtons>
+            )}
         </div>
     </div>  
 </div>

@@ -68,3 +68,16 @@ export const validateReclamation = async (id: number) => {
         throw new Error("Validation failed!");
     }
 }
+
+export const deleteReclamation = async (id: number) => {
+    try {
+        const response = await axios.delete(`${API_URL}delete/${id}/`, {
+            withCredentials: true
+        });
+        return response.data;
+    }
+    catch (e) {
+        console.error("Error deleting reclamation:", e);
+        throw new Error("Deletion failed!");
+    }
+}

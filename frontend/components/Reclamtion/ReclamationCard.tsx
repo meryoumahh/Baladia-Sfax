@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { FaExclamationTriangle } from 'react-icons/fa';
-import { FaStopwatch } from 'react-icons/fa'; 
-import { FaCheck } from 'react-icons/fa';
+import { FaExclamationTriangle, FaStopwatch, FaCheck, FaTrash } from 'react-icons/fa';
 interface ReclamationCardProps {
+  id: number;
   titre: string;
   description: string;
   category: string;
@@ -10,9 +9,11 @@ interface ReclamationCardProps {
   localization: string;
   date: string;
   picture: string;
+  onDelete?: (id: number) => void;
 }
 
 export default function ReclamationCard({
+  id,
   titre,
   description,
   category,
@@ -20,8 +21,15 @@ export default function ReclamationCard({
   localization,
   date,
   picture,
+  onDelete,
 }: ReclamationCardProps) {
   const [showPopup, setShowPopup] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const handleDelete = () => {
+    onDelete?.(id);
+    setShowDeleteConfirm(false);
+  };
 
   return (
     <>
@@ -56,29 +64,64 @@ export default function ReclamationCard({
           {status.replace("_", " ")}
         </span>
 
-          <button
-            onClick={() => setShowPopup(true)}
-            className="mt-4 px-4 py-2 bg-[#113f67] text-white rounded-lg hover:bg-blue-500 transition"
-          >
-            Voir Photo
-          </button>
+          <div className="flex gap-2 mt-4">
+            <button
+              onClick={() => setShowPopup(true)}
+              className="px-4 py-2 bg-[#113f67] text-white rounded-lg hover:bg-blue-500 transition"
+            >
+              Voir Photo
+            </button>
+            {onDelete && (
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition flex items-center gap-1"
+                title="Supprimer"
+              >
+                <FaTrash size={14} />
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Popup for the picture */}
       {showPopup && (
-      <div className="fixed inset-0 bg-transparent bg-opacity-30 backdrop-blur-sm flex justify-center items-center z-50 w-full">
-        <div className="bg-white rounded-lg p-4 relative max-w-1/2 w-full">
-          <button
-            onClick={() => setShowPopup(false)}
-            className="absolute top-2 right-2 text-gray-600 hover:text-gray-800 font-bold text-2xl"
-          >
-            &times;
-          </button>
-          <img src={picture} alt={titre} className="w-full h-auto rounded-lg" />
+        <div className="fixed inset-0 bg-transparent bg-opacity-30 backdrop-blur-sm flex justify-center items-center z-50 w-full">
+          <div className="bg-white rounded-lg p-4 relative max-w-1/2 w-full">
+            <button
+              onClick={() => setShowPopup(false)}
+              className="absolute top-2 right-2 text-gray-600 hover:text-gray-800 font-bold text-2xl"
+            >
+              &times;
+            </button>
+            <img src={picture} alt={titre} className="w-full h-auto rounded-lg" />
+          </div>
         </div>
-      </div>
-    )}
+      )}
+
+      {/* Delete confirmation popup */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-transparent bg-opacity-30 backdrop-blur-sm flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Confirmer la suppression</h3>
+            <p className="text-gray-600 mb-6">Êtes-vous sûr de vouloir supprimer cette réclamation ? Cette action est irréversible.</p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleDelete}
+                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+              >
+                Supprimer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </>
   );

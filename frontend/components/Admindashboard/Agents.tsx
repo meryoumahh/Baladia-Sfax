@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { getAgentList, registerServiceProvider,  } from '@/app/utils/auth';
-import { FaPlus } from 'react-icons/fa';
+import { FaPlus, FaEye, FaEyeSlash } from 'react-icons/fa';
 
 
 interface Agent {
@@ -11,6 +11,7 @@ interface Agent {
   email: string;
   phone: string | null;
   serviceCategory: string;
+  plain_password: string | null;
 }
 
 const Agents = () => {
@@ -24,6 +25,7 @@ const [formData, setFormData] = useState({
   telephone: '',
   serviceCategory: ''
 });
+const [visiblePasswords, setVisiblePasswords] = useState<Set<number>>(new Set());
      useEffect(() => {
         const fetchAgent = async () => {
           try {
@@ -48,21 +50,39 @@ const [formData, setFormData] = useState({
     const password = generatePassword();
     
     try {
-      await registerServiceProvider(
-        formData.firstName,
-        formData.lastName,
-        formData.email,
-        password,
-        formData.telephone,
-        'agent',
-        formData.serviceCategory
-      );
-      alert(`Agent créé avec succès!\nMot de passe: ${password}`);
-      setShowCreateForm(false);
-      setFormData({ firstName: '', lastName: '', email: '', telephone: '', serviceCategory: '' });
-      // Refresh the list
-      const data = await getAgentList();
-      setAgents(data);
+      // Create agent with the generated password
+      const agentData = {
+        user: {
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          email: formData.email,
+          password: password,
+          telephone: formData.telephone,
+          role: 'agent'
+        },
+        serviceCategory: formData.serviceCategory,
+        plain_password: password  // Store plain password for admin viewing
+      };
+      
+      const response = await fetch('http://localhost:8000/api/auth/agent/signup/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(agentData)
+      });
+      
+      if (response.ok) {
+        alert(`Agent créé avec succès!\nMot de passe: ${password}`);
+        setShowCreateForm(false);
+        setFormData({ firstName: '', lastName: '', email: '', telephone: '', serviceCategory: '' });
+        // Refresh the list
+        const data = await getAgentList();
+        setAgents(data);
+      } else {
+        throw new Error('Failed to create agent');
+      }
     } catch (error) {
       console.error('Error creating agent:', error);
       alert('Erreur lors de la création de l\'agent');
@@ -93,6 +113,7 @@ if (loading) return <div className="text-center p-4">Loading...</div>;
             <th className="border border-gray-300 p-2">Email</th>
             <th className="border border-gray-300 p-2">Phone</th>
             <th className="border border-gray-300 p-2">Service Category</th>
+            <th className="border border-gray-300 p-2">Mot de Passe</th>
           </tr>
         </thead>
         <tbody>
@@ -102,7 +123,46 @@ if (loading) return <div className="text-center p-4">Loading...</div>;
               <td className="border border-gray-300 p-2">{agent.name}</td>
               <td className="border border-gray-300 p-2">{agent.email}</td>
               <td className="border border-gray-300 p-2">{agent.phone || "N/A"}</td>
-              <td className="border border-gray-300 p-2">{agent.serviceCategory}</td>
+              <td className="border border-gray-300 p-2">
+                {agent.serviceCategory === 'ALL' ? 'Tous Services' :
+                 agent.serviceCategory === 'LIGHT' ? 'Éclairage Public' :
+                 agent.serviceCategory === 'ROAD' ? 'Routes & Trottoirs' :
+                 agent.serviceCategory === 'WATER' ? 'Eau & Assainissement' :
+                 agent.serviceCategory === 'SANITATION' ? 'Gestion des Déchets & Propreté' :
+                 agent.serviceCategory === 'ELECTRICITY' ? 'Infrastructures Électriques' :
+                 agent.serviceCategory === 'TELECOM' ? 'Lignes de Télécommunication' :
+                 agent.serviceCategory === 'TRAFFIC' ? 'Feux & Signalisation Routière' :
+                 agent.serviceCategory === 'BUILDING' ? 'Entretien des Bâtiments Publics' :
+                 agent.serviceCategory === 'PARK' ? 'Parcs & Espaces Verts' :
+                 agent.serviceCategory === 'BRIDGE' ? 'Ponts & Passerelles' :
+                 agent.serviceCategory === 'EMERGENCY' ? 'Réparations d\'Urgence' :
+                 agent.serviceCategory}
+              </td>
+              <td className="border border-gray-300 p-2">
+                {agent.plain_password ? (
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-sm">
+                      {visiblePasswords.has(agent.id) ? agent.plain_password : '••••••••'}
+                    </span>
+                    <button
+                      onClick={() => {
+                        const newVisible = new Set(visiblePasswords);
+                        if (visiblePasswords.has(agent.id)) {
+                          newVisible.delete(agent.id);
+                        } else {
+                          newVisible.add(agent.id);
+                        }
+                        setVisiblePasswords(newVisible);
+                      }}
+                      className="text-blue-500 hover:text-blue-700 p-1 rounded"
+                    >
+                      {visiblePasswords.has(agent.id) ? <FaEyeSlash size={14} /> : <FaEye size={14} />}
+                    </button>
+                  </div>
+                ) : (
+                  <span className="text-gray-400">N/A</span>
+                )}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -180,9 +240,18 @@ if (loading) return <div className="text-center p-4">Loading...</div>;
                   required
                 >
                   <option value="">Sélectionner une catégorie</option>
-                  <option value="ALL">ALL</option>
-                  <option value="LIGHT">LIGHT</option>
-                  <option value="ROAD">ROAD</option>
+                  <option value="ALL">Tous Services</option>
+                  <option value="LIGHT">Éclairage Public</option>
+                  <option value="ROAD">Routes & Trottoirs</option>
+                  <option value="WATER">Eau & Assainissement</option>
+                  <option value="SANITATION">Gestion des Déchets & Propreté</option>
+                  <option value="ELECTRICITY">Infrastructures Électriques</option>
+                  <option value="TELECOM">Lignes de Télécommunication</option>
+                  <option value="TRAFFIC">Feux & Signalisation Routière</option>
+                  <option value="BUILDING">Entretien des Bâtiments Publics</option>
+                  <option value="PARK">Parcs & Espaces Verts</option>
+                  <option value="BRIDGE">Ponts & Passerelles</option>
+                  <option value="EMERGENCY">Réparations d'Urgence</option>
                 </select>
               </div>
               

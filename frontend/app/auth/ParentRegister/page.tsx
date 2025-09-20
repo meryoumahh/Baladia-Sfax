@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import StepTwoRegisterClient from "@/components/MainPageCom/AuthenticationCom/StepTwoRegisterClient";
 import StepOneRegister from "@/components/MainPageCom/AuthenticationCom/StepOneRegister";
 import { registerUser, registerServiceProvider } from "../../utils/auth"; 
@@ -7,6 +8,7 @@ import StepTwoRegisterServiceProvider from "@/components/MainPageCom/Authenticat
 
 const Page = () => {
   const [stepIndex, setStepIndex] = useState(0);
+  const router = useRouter();
 
   // common infos
   const [role, setRole] = useState("citoyen");
@@ -87,6 +89,7 @@ const Page = () => {
         
       );
       alert("Client registration works successfully!");
+      router.push("/auth/signin");
     } catch (e) {
       alert(
         "Failed to register client with info: \n" +
@@ -125,6 +128,7 @@ const Page = () => {
         userData.serviceCategory
       );
       alert("Service Provider registration works successfully!");
+      router.push("/auth/signin");
     } catch (e) {
       alert(
         "Failed to register service provider with info: \n" +

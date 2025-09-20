@@ -7,9 +7,10 @@ import { useRouter } from 'next/navigation'
 
 interface NavBarProps {
   user?: any;
+  redirectToDashboard?: (user: any) => void;
 }
 
-const NavBar = ({ user }: NavBarProps) => {
+const NavBar = ({ user, redirectToDashboard }: NavBarProps) => {
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -34,7 +35,16 @@ const NavBar = ({ user }: NavBarProps) => {
           <Link href="/about" className="hover:text-[#58A0C8] text-amber-50 font-inter font-medium text-s sm:text-l">About</Link>
           <Link href="/services" className="hover:text-[#58A0C8] text-amber-50 font-inter font-medium text-s sm:text-l">Services</Link>
           <Link href="/contact" className="hover:text-[#58A0C8] text-amber-50 font-inter font-medium text-s sm:text-l">Contact</Link>
-          <SecondButton href="/register">Reclamer</SecondButton>
+          {user ? (
+            <button 
+              onClick={() => redirectToDashboard && redirectToDashboard(user)}
+              className="bg-[#58A0C8] text-white px-4 py-2 rounded-full hover:bg-[#4a8bb8] font-inter font-medium text-s sm:text-l"
+            >
+              Reclamer
+            </button>
+          ) : (
+            <SecondButton href="/auth/signin">Reclamer</SecondButton>
+          )}
           {user ? (
             <button 
               onClick={handleLogout}
