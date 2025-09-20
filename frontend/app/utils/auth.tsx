@@ -1,6 +1,25 @@
 import axios from "axios";
-const API_URL = "http://localhost:8000/api/auth/";
-axios.defaults.withCredentials = true; 
+
+// Use environment variables with fallback for development
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/auth/";
+const RECLAMATION_API_URL = process.env.NEXT_PUBLIC_RECLAMATION_API_URL || "http://localhost:8000/api/reclamation/";
+
+axios.defaults.withCredentials = true;
+
+// Create axios instance with default config
+const apiClient = axios.create({
+  withCredentials: true,
+  timeout: 10000, // 10 second timeout
+});
+
+// Add response interceptor for centralized error handling
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error('API Error:', error.response?.data || error.message);
+    return Promise.reject(error);
+  }
+); 
 
 export const registerUser = async (
     first_name: string,
@@ -228,9 +247,7 @@ export const getCitoyenList = async () => {
 
 export const validateCitoyen = async (citoyenId: number) => {
     try {
-        const response = await axios.post(`http://localhost:8000/api/auth/validateCitoyen/${citoyenId}/`, {}, {
-            withCredentials: true
-        })
+        const response = await apiClient.post(`${API_URL}validateCitoyen/${citoyenId}/`, {})
         return response.data;
     }
     catch (e) {

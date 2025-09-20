@@ -230,9 +230,138 @@ npm run dev
 4. **Transparence** dans le suivi des demandes
 5. **Efficacité** opérationnelle pour les agents
 
+## 🔧 Améliorations de Sécurité et Refactoring
+
+### ✅ **Améliorations Implémentées**
+
+#### **Sécurité Backend**
+- **Variables d'Environnement**: Configuration sécurisée des URLs API via `.env.local`
+- **Validation Renforcée**: Validation complète des entrées utilisateur avec gestion d'erreurs
+- **Codes de Statut HTTP**: Réponses API standardisées avec codes appropriés
+- **Logging**: Système de journalisation pour le débogage et la surveillance
+- **Validation des Mots de Passe**: Critères de sécurité renforcés (longueur, complexité)
+- **Protection des Transactions**: Utilisation de transactions atomiques pour l'intégrité des données
+
+#### **Architecture Frontend**
+- **Interfaces TypeScript**: Définitions de types complètes remplaçant les types `any`
+- **Couche de Service API**: Centralisation des appels API avec gestion d'erreurs
+- **Intercepteurs Axios**: Gestion centralisée des erreurs et redirection automatique
+- **Validation des Formulaires**: Amélioration de la validation côté client
+
+#### **Nouvelles Fonctionnalités**
+- **Affichage/Masquage des Mots de Passe**: Interface admin avec icônes œil pour les mots de passe agents
+- **Réassignation d'Agents**: Possibilité de changer l'agent assigné à une réclamation
+- **Profils Éditables**: Modification des profils utilisateur avec validation
+- **Persistance de Navigation**: Sauvegarde de l'état de navigation dans localStorage
+
+### 🔄 **Fonctionnalités Partiellement Intégrées**
+
+#### **Système d'Email pour Agents**
+**État**: Préparé mais non actif
+
+**Ce qui existe**:
+- Utilitaires de génération de mots de passe sécurisés (`utils.py`)
+- Fonction d'envoi d'email `send_password_email()`
+- Validation de force des mots de passe
+
+**Ce qui manque pour l'activation**:
+```python
+# Configuration email requise dans settings.py
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'votre-email@gmail.com'
+EMAIL_HOST_PASSWORD = 'mot-de-passe-app'
+DEFAULT_FROM_EMAIL = 'votre-email@gmail.com'
+```
+
+**Workflow Actuel**:
+```
+Admin crée agent → Mot de passe généré → Stocké en base → Affiché dans UI admin
+```
+
+**Workflow Sécurisé Proposé**:
+```
+Admin crée agent → Mot de passe généré → Email envoyé → Pas de stockage en clair
+```
+
+### ⚠️ **Problèmes de Sécurité Identifiés**
+
+#### **Critique - À Résoudre**
+1. **Stockage en Clair**: Mots de passe agents stockés non chiffrés dans `AgentProfile.plain_password`
+2. **Accès Admin**: Administrateurs peuvent voir tous les mots de passe agents
+3. **Pas d'Expiration**: Mots de passe sans expiration ni changement forcé
+4. **Risque Base de Données**: Compromission = exposition de tous les mots de passe
+
+#### **Recommandations de Sécurité**
+1. **Supprimer** le champ `plain_password`
+2. **Implémenter** la récupération de mot de passe par email
+3. **Forcer** le changement de mot de passe à la première connexion
+4. **Ajouter** l'expiration des mots de passe
+5. **Configurer** le serveur email pour l'envoi automatique
+
+### 📁 **Nouveaux Fichiers Créés**
+
+```
+backend/
+└── userauth/
+    └── utils.py              # Utilitaires de sécurité et email
+
+frontend/
+├── .env.local               # Variables d'environnement
+├── types/
+│   └── index.ts            # Interfaces TypeScript
+└── services/
+    └── api.ts              # Couche de service API centralisée
+```
+
+### 🔧 **Configuration Requise pour Production**
+
+#### **Variables d'Environnement**
+```bash
+# Frontend (.env.local)
+NEXT_PUBLIC_API_URL=http://localhost:8000/api/auth/
+NEXT_PUBLIC_RECLAMATION_API_URL=http://localhost:8000/api/reclamation/
+
+# Backend (settings.py)
+EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
+EMAIL_HOST_USER=your-email@gmail.com
+EMAIL_HOST_PASSWORD=your-app-password
+```
+
+### 📊 **État de Production**
+
+**✅ Prêt pour Production**:
+- Authentification JWT sécurisée
+- Validation des données renforcée
+- Gestion d'erreurs centralisée
+- Interface utilisateur complète
+- Fonctionnalités métier opérationnelles
+
+**⚠️ Nécessite Configuration**:
+- Serveur email pour notifications agents
+- Variables d'environnement de production
+- Suppression du stockage de mots de passe en clair
+
+**🔴 Risques de Sécurité**:
+- Mots de passe agents visibles par admin
+- Pas de récupération de mot de passe sécurisée
+- Configuration email manquante
+
+### 🎯 **Prochaines Étapes Recommandées**
+
+1. **Immédiat**: Configurer le serveur email
+2. **Court terme**: Supprimer le stockage de mots de passe en clair
+3. **Moyen terme**: Implémenter la récupération de mot de passe
+4. **Long terme**: Ajouter l'authentification à deux facteurs
+
 ## 👥 Équipe de Développement
 
-Projet développé dans le cadre d'un stage d'ingénierie logicielle, démontrant une maîtrise complète du développement full-stack moderne avec Django et Next.js.
+Projet développé dans le cadre d'un stage d'ingénierie logicielle, démontrant une maîtrise complète du développement full-stack moderne avec Django et Next.js, incluant les meilleures pratiques de sécurité et d'architecture.
 
 ---
 

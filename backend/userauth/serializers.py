@@ -4,8 +4,10 @@ from rest_framework import serializers
 from django.contrib.auth import authenticate
 from rest_framework.permissions import AllowAny
 from django.contrib.auth.password_validation import validate_password
-from rest_framework.validators import UniqueValidator  # <-- import from here
+from rest_framework.validators import UniqueValidator
 from datetime import date
+from django.core.exceptions import ValidationError
+from .utils import PasswordValidator
 #class CustomUserSerializer(ModelSerializer):
 #    class Meta:
 #       model = CustomUser
@@ -36,7 +38,14 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
     # Password validation
     def validate_password(self, value):
+        # Use Django's built-in validation
         validate_password(value)
+        
+        # Add custom validation
+        errors = PasswordValidator.validate_password_strength(value)
+        if errors:
+            raise serializers.ValidationError(errors)
+            
         return value
 
     

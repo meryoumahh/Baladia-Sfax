@@ -11,32 +11,73 @@ from rest_framework_simplejwt.exceptions import InvalidToken
 from rest_framework import permissions
 from .models import CustomUser, CitoyenProfile, AgentProfile
 import json
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, status
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
 from rest_framework.decorators import api_view, permission_classes
+from django.db import transaction
+from django.core.exceptions import ValidationError
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Create your views here.
 class UserInfoView(RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = UserInfoSerializer
+    
     def get_object(self):
         return self.request.user
     
     def patch(self, request, *args, **kwargs):
+        """Update user profile with validation"""
         user = self.get_object()
         data = request.data
         
-        # Update allowed fields
-        if 'first_name' in data:
-            user.first_name = data['first_name']
-        if 'last_name' in data:
-            user.last_name = data['last_name']
-        if 'telephone' in data:
-            user.telephone = data['telephone']
-        
-        user.save()
-        serializer = self.get_serializer(user)
-        return Response(serializer.data)
+        try:
+            with transaction.atomic():
+                # Validate and update allowed fields
+                if 'first_name' in data:
+                    if not data['first_name'].strip():
+                        return Response(
+                            {'error': 'First name cannot be empty'}, 
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                    user.first_name = data['first_name'].strip()
+                    
+                if 'last_name' in data:
+                    if not data['last_name'].strip():
+                        return Response(
+                            {'error': 'Last name cannot be empty'}, 
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                    user.last_name = data['last_name'].strip()
+                    
+                if 'telephone' in data:
+                    telephone = data['telephone'].strip()
+                    if not telephone.isdigit() or len(telephone) != 8:
+                        return Response(
+                            {'error': 'Telephone must be 8 digits'}, 
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                    user.telephone = telephone
+                
+                user.full_clean()  # Validate model constraints
+                user.save()
+                
+                serializer = self.get_serializer(user)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+                
+        except ValidationError as e:
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            logger.error(f"Profile update error for user {user.id}: {str(e)}")
+            return Response(
+                {'error': 'An unexpected error occurred'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
     
 class UserSignupView(CreateAPIView):
     def post(self, request):
@@ -362,13 +403,45 @@ class CitoyenListView(generics.ListAPIView):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def validate_citoyen(request, pk):
+    """Validate a citoyen profile - Admin only"""
     if not request.user.is_superuser:
-        return Response({'error': 'Only admin can validate citoyens'}, status=403)
+        return Response(
+            {'error': 'Permission denied. Admin access required.'}, 
+            status=status.HTTP_403_FORBIDDEN
+        )
     
     try:
+        # Validate pk is a valid integer
+        if not str(pk).isdigit():
+            return Response(
+                {'error': 'Invalid citoyen ID format'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
         citoyen = CitoyenProfile.objects.get(pk=pk)
+        
+        # Check if already validated
+        if citoyen.isValid:
+            return Response(
+                {'message': 'Citoyen is already validated'}, 
+                status=status.HTTP_200_OK
+            )
+            
         citoyen.isValid = True
         citoyen.save()
-        return Response({'message': 'Citoyen validated successfully'})
+        
+        return Response(
+            {'message': 'Citoyen validated successfully'}, 
+            status=status.HTTP_200_OK
+        )
+        
     except CitoyenProfile.DoesNotExist:
-        return Response({'error': 'Citoyen not found'}, status=404)
+        return Response(
+            {'error': 'Citoyen not found'}, 
+            status=status.HTTP_404_NOT_FOUND
+        )
+    except Exception as e:
+        return Response(
+            {'error': 'An unexpected error occurred'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
